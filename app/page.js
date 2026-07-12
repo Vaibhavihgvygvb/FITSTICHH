@@ -10,6 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -689,6 +690,7 @@ function ProductPage({ productId, onNav, cart }) {
 function CartDrawer({ open, onOpenChange, cart, onNav }) {
   const [coupon, setCoupon] = useState('');
   const [applied, setApplied] = useState(null);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
   const applyCoupon = () => {
     if (coupon.toUpperCase() === 'FIRST10') { setApplied({ code: 'FIRST10', pct: 10 }); toast.success('Coupon applied · 10% off'); }
     else toast.error('Invalid coupon');
@@ -746,12 +748,122 @@ function CartDrawer({ open, onOpenChange, cart, onNav }) {
               <div className="flex justify-between"><span className="text-neutral-500">Shipping</span><span>{shipping === 0 ? 'FREE' : inr(shipping)}</span></div>
               <div className="flex justify-between font-bold text-lg pt-2 border-t border-neutral-100 mt-2"><span>Total</span><span>{inr(total)}</span></div>
             </div>
-            <Button className="w-full h-12 rounded-none bg-black text-xs uppercase tracking-[0.2em]">Checkout · {inr(total)}</Button>
-            <p className="text-[11px] text-neutral-400 text-center">Checkout & Payments arriving in Phase 2</p>
+            <Button onClick={() => setCheckoutOpen(true)} className="w-full h-12 rounded-none bg-black text-xs uppercase tracking-[0.2em]">Checkout · {inr(total)}</Button>
+            <p className="text-[11px] text-neutral-400 text-center">Cash on Delivery · Online payments arriving in Phase 2</p>
           </div>
         )}
       </SheetContent>
+      <CheckoutDialog
+        open={checkoutOpen}
+        onClose={() => setCheckoutOpen(false)}
+        cart={cart}
+        applied={applied}
+        discount={discount}
+        shipping={shipping}
+        total={total}
+        onDrawerClose={() => onOpenChange(false)}
+      />
     </Sheet>
+  );
+}
+
+function CheckoutDialog({ open, onClose, cart, applied, discount, shipping, total, onDrawerClose }) {
+  const [form, setForm] = useState({ name: '', email: '', phone: '', address: '', city: '', pincode: '' });
+  const [submitting, setSubmitting] = useState(false);
+  const [confirmed, setConfirmed] = useState(null);
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!form.email || !form.phone || !form.address || !form.pincode) { toast.error('Fill all required fields'); return; }
+    if (!form.pincode.match(/^\d{6}$/)) { toast.error('Invalid pincode'); return; }
+    setSubmitting(true);
+    try {
+      const r = await fetch('/api/orders', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customer: form,
+          items: cart.items,
+          subtotal: cart.subtotal,
+          discount, shipping, total,
+          couponCode: applied?.code || null,
+          paymentMethod: 'COD',
+        }),
+      });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || 'Failed');
+      setConfirmed(j.order);
+      cart.items.forEach(i => cart.remove(i.key));
+    } catch (e) { toast.error(e.message); }
+    setSubmitting(false);
+  };
+
+  const close = () => {
+    setConfirmed(null); setForm({ name:'',email:'',phone:'',address:'',city:'',pincode:'' });
+    onClose(); if (confirmed) onDrawerClose();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={close}>
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        {confirmed ? (
+          <div className="text-center py-6">
+            <div className="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
+              <Check className="w-7 h-7 text-emerald-700" />
+            </div>
+            <h2 className="font-display font-black text-3xl tracking-tight mb-2">Order confirmed</h2>
+            <p className="text-neutral-500 mb-4">We'll get it stitched and shipped.</p>
+            <div className="bg-neutral-50 py-4 px-6 inline-block">
+              <div className="text-xs text-neutral-500 uppercase tracking-widest">Order ID</div>
+              <div className="font-mono font-semibold">{confirmed.id}</div>
+            </div>
+            <div className="text-sm text-neutral-600 mt-4">Paying <b>{inr(confirmed.total)}</b> · Cash on Delivery</div>
+            <Button onClick={close} className="mt-6 rounded-none w-full h-12 bg-black text-xs uppercase tracking-[0.2em]">Continue shopping</Button>
+          </div>
+        ) : (
+          <>
+            <DialogHeader><DialogTitle className="font-display text-2xl">Checkout</DialogTitle></DialogHeader>
+            <form onSubmit={submit} className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="col-span-2">
+                  <label className="text-xs uppercase tracking-widest text-neutral-500 mb-1 block">Full name</label>
+                  <Input value={form.name} onChange={(e) => set('name', e.target.value)} required className="rounded-none" />
+                </div>
+                <div>
+                  <label className="text-xs uppercase tracking-widest text-neutral-500 mb-1 block">Email *</label>
+                  <Input type="email" value={form.email} onChange={(e) => set('email', e.target.value)} required className="rounded-none" />
+                </div>
+                <div>
+                  <label className="text-xs uppercase tracking-widest text-neutral-500 mb-1 block">Phone *</label>
+                  <Input value={form.phone} onChange={(e) => set('phone', e.target.value)} required className="rounded-none" />
+                </div>
+                <div className="col-span-2">
+                  <label className="text-xs uppercase tracking-widest text-neutral-500 mb-1 block">Address *</label>
+                  <Input value={form.address} onChange={(e) => set('address', e.target.value)} required className="rounded-none" placeholder="House / Street" />
+                </div>
+                <div>
+                  <label className="text-xs uppercase tracking-widest text-neutral-500 mb-1 block">City</label>
+                  <Input value={form.city} onChange={(e) => set('city', e.target.value)} className="rounded-none" />
+                </div>
+                <div>
+                  <label className="text-xs uppercase tracking-widest text-neutral-500 mb-1 block">Pincode *</label>
+                  <Input value={form.pincode} onChange={(e) => set('pincode', e.target.value)} required maxLength={6} className="rounded-none" />
+                </div>
+              </div>
+              <div className="bg-neutral-50 p-4 space-y-1 text-sm">
+                <div className="flex justify-between"><span className="text-neutral-500">Subtotal</span><span>{inr(cart.subtotal)}</span></div>
+                {discount > 0 && <div className="flex justify-between text-green-700"><span>Discount</span><span>-{inr(discount)}</span></div>}
+                <div className="flex justify-between"><span className="text-neutral-500">Shipping</span><span>{shipping === 0 ? 'FREE' : inr(shipping)}</span></div>
+                <div className="flex justify-between font-bold pt-2 border-t"><span>Total (COD)</span><span>{inr(total)}</span></div>
+              </div>
+              <Button type="submit" disabled={submitting} className="w-full h-12 rounded-none bg-black text-xs uppercase tracking-[0.2em]">
+                {submitting ? 'Placing…' : `Place order · ${inr(total)}`}
+              </Button>
+            </form>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
 
