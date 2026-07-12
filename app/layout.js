@@ -1,5 +1,6 @@
 import { Inter } from 'next/font/google';
 import { Toaster } from '@/components/ui/sonner';
+import Providers from './providers';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
@@ -19,7 +20,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={inter.variable}>
       <body className="font-sans antialiased bg-white text-black">
-        {children}
+        <Providers>{children}</Providers>
         <Toaster position="top-center" richColors />
       </body>
     </html>

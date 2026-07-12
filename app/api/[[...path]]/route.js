@@ -1,21 +1,12 @@
 import { NextResponse } from 'next/server';
-import { MongoClient } from 'mongodb';
 import { v4 as uuidv4 } from 'uuid';
 import crypto from 'crypto';
+import { getDb } from '@/lib/db';
+import { rateLimit } from '@/lib/rate-limit';
 
-const MONGO_URL = process.env.MONGO_URL;
-const DB_NAME = process.env.DB_NAME || 'fitstich';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'fitstich2025';
 const ADMIN_TOKEN_SECRET = process.env.ADMIN_TOKEN_SECRET || 'fitstich-secret';
-
-let cachedClient = null;
-async function getDb() {
-  if (!cachedClient) {
-    cachedClient = new MongoClient(MONGO_URL);
-    await cachedClient.connect();
-  }
-  return cachedClient.db(DB_NAME);
-}
+const IS_DEV = process.env.NODE_ENV !== 'production';
 
 /* ============ Seed data ============ */
 const SEED_PRODUCTS = [
@@ -252,6 +243,10 @@ export async function POST(request, { params }) {
     if (p[0] === 'newsletter') {
       const { email } = body;
       if (!email) return json({ error: 'email required' }, 400);
+      const rl = rateLimit({ interval: 60000, max: 5 });
+      const clientIp = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+      const check = rl(`newsletter:${clientIp}`);
+      if (!check.allowed) return json({ error: `Too many requests. Retry in ${check.retryAfter}s` }, 429);
       await db.collection('newsletter').updateOne(
         { email: email.toLowerCase().trim() },
         { $set: { email: email.toLowerCase().trim(), subscribedAt: new Date() } },
@@ -262,9 +257,22 @@ export async function POST(request, { params }) {
 
     /* Guest order placement */
     if (p[0] === 'orders') {
+      const rl = rateLimit({ interval: 60000, max: 10 });
+      const clientIp = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+      const check = rl(`orders:${clientIp}`);
+      if (!check.allowed) return json({ error: `Too many requests. Retry in ${check.retryAfter}s` }, 429);
+
       const { customer, items, subtotal, discount, shipping, total, couponCode, paymentMethod } = body;
       if (!customer?.email || !customer?.phone || !customer?.address || !items?.length) {
         return json({ error: 'Missing required fields' }, 400);
+      }
+      // Validate stock
+      for (const it of items) {
+        const prod = await db.collection('products').findOne({ id: it.id }, { projection: { stock: 1 } });
+        if (!prod) return json({ error: `Product ${it.id} not found` }, 400);
+        if ((prod.stock || 0) < it.quantity) {
+          return json({ error: `Insufficient stock for ${it.name || it.id}. Available: ${prod.stock || 0}, requested: ${it.quantity}` }, 409);
+        }
       }
       const order = {
         id: `FS-${Date.now().toString(36).toUpperCase()}-${uuidv4().slice(0,4).toUpperCase()}`,
@@ -281,7 +289,7 @@ export async function POST(request, { params }) {
         createdAt: new Date(),
       };
       await db.collection('orders').insertOne(order);
-      // reduce stock (best-effort)
+      // reduce stock
       for (const it of items) {
         await db.collection('products').updateOne(
           { id: it.id, stock: { $gte: it.quantity } },
@@ -289,6 +297,8 @@ export async function POST(request, { params }) {
         );
       }
       const { _id, ...rest } = order;
+      // Trigger order confirmation email (async, non-blocking)
+      try { await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/email`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'confirmation', order: rest }) }); } catch {}
       return json({ ok: true, order: rest });
     }
 
@@ -335,8 +345,9 @@ export async function POST(request, { params }) {
         return json({ ok: true, product: rest });
       }
 
-      /* Reseed */
+      /* Reseed — dev-only */
       if (p[1] === 'reseed') {
+        if (!IS_DEV) return json({ error: 'Not available in production' }, 403);
         await db.collection('products').deleteMany({});
         await db.collection('products').insertMany(SEED_PRODUCTS);
         return json({ ok: true, seeded: SEED_PRODUCTS.length });
@@ -388,6 +399,10 @@ export async function PUT(request, { params }) {
         const r = await db.collection('orders').updateOne({ id: p[2] }, { $set: update });
         if (!r.matchedCount) return json({ error: 'Not found' }, 404);
         const order = await db.collection('orders').findOne({ id: p[2] }, { projection: { _id: 0 } });
+        // Trigger shipping notification email
+        if (body.status === 'shipped') {
+          try { await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/email`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'shipping', order }) }); } catch {}
+        }
         return json({ ok: true, order });
       }
     }

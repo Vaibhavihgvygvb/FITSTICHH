@@ -460,12 +460,30 @@ function ProductEditor({ product, client, onClose, onSaved }) {
               <Input value={form.fabricCare} onChange={(e) => set('fabricCare', e.target.value)} className="rounded-none" />
             </div>
             <div className="col-span-2">
-              <label className="text-xs uppercase tracking-[0.2em] text-neutral-500 mb-2 block">Image URLs (one per line)</label>
-              <Textarea value={form.images} onChange={(e) => set('images', e.target.value)} rows={4} className="rounded-none font-mono text-xs" />
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-xs uppercase tracking-[0.2em] text-neutral-500">Images</label>
+                <label className="cursor-pointer text-xs uppercase tracking-widest underline">
+                  + Upload image
+                  <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={async (e) => {
+                    const f = e.target.files?.[0];
+                    if (!f) return;
+                    if (f.size > 5 * 1024 * 1024) { toast.error('File too large. Max 5MB'); return; }
+                    const fd = new FormData(); fd.append('file', f);
+                    try {
+                      const r = await fetch('/api/upload', { method: 'POST', body: fd });
+                      const d = await r.json();
+                      if (d.ok) { set('images', form.images ? form.images + '\n' + d.url : d.url); toast.success('Uploaded'); }
+                      else toast.error(d.error);
+                    } catch { toast.error('Upload failed'); }
+                    e.target.value = '';
+                  }} />
+                </label>
+              </div>
+              <Textarea value={form.images} onChange={(e) => set('images', e.target.value)} rows={4} className="rounded-none font-mono text-xs" placeholder="Paste image URLs or use Upload button above" />
               {form.images && (
                 <div className="flex gap-2 mt-3 overflow-x-auto">
                   {form.images.split(/\n+/).filter(Boolean).slice(0,6).map((u, i) => (
-                    <div key={i} className="w-16 h-20 bg-neutral-50 flex-shrink-0"><img src={u} className="w-full h-full object-cover" alt="" /></div>
+                    <div key={i} className="w-16 h-20 bg-neutral-50 flex-shrink-0 overflow-hidden"><img src={u} className="w-full h-full object-cover" alt="" /></div>
                   ))}
                 </div>
               )}
