@@ -18,11 +18,17 @@ import { toast } from 'sonner';
 const inr = (n) => `₹${Number(n).toLocaleString('en-IN')}`;
 const cx = (...c) => c.filter(Boolean).join(' ');
 
+const GENDERS = { MEN: 'men', WOMEN: 'women' };
+const GENDER_LABELS = { men: 'Men', women: 'Women' };
 const CATEGORIES = [
   { key: 'oversized', label: 'Oversized Tees' },
   { key: 'regular', label: 'Regular Tees' },
   { key: 'joggers', label: 'Joggers' },
   { key: 'pyjamas', label: 'Pyjamas' },
+];
+const GENDER_CARDS = [
+  { gender: GENDERS.MEN, label: 'Men', img: 'https://images.pexels.com/photos/7945666/pexels-photo-7945666.jpeg' },
+  { gender: GENDERS.WOMEN, label: 'Women', img: 'https://images.pexels.com/photos/6626903/pexels-photo-6626903.jpeg' },
 ];
 const ALL_SIZES = ['XS','S','M','L','XL','XXL'];
 const ALL_COLORS = [
@@ -67,28 +73,15 @@ function AnnouncementBar() {
   );
 }
 
-function Navbar({ onNav, cartCount, onCartOpen, onSearchOpen }) {
+function Navbar({ onNav, cartCount, onCartOpen, onSearchOpen, activeGender }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [megaOpen, setMegaOpen] = useState(null);
+  const [megaGender, setMegaGender] = useState(null);
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', onScroll); return () => window.removeEventListener('scroll', onScroll);
   }, []);
-  const menu = [
-    { key: 'shop', label: 'Shop', mega: CATEGORIES },
-    { key: 'oversized', label: 'Oversized' },
-    { key: 'joggers', label: 'Joggers' },
-    { key: 'pyjamas', label: 'Pyjamas' },
-    { key: 'new', label: 'New Arrivals' },
-    { key: 'sale', label: 'Sale' },
-  ];
-  const handleClick = (m) => {
-    if (m.key === 'shop') onNav({ view: 'shop' });
-    else if (m.key === 'new') onNav({ view: 'shop', tag: 'new' });
-    else if (m.key === 'sale') onNav({ view: 'shop', tag: 'best-seller' });
-    else onNav({ view: 'shop', category: m.key });
-  };
+  const handleGenderClick = (g) => onNav({ view: 'shop', gender: g });
   return (
     <header className={cx('sticky top-0 z-40 w-full transition-all duration-500 bg-white', scrolled ? 'shadow-luxe border-b border-neutral-100' : 'border-b border-transparent')}>
       <div className="max-w-[1400px] mx-auto px-5 lg:px-10">
@@ -100,29 +93,27 @@ function Navbar({ onNav, cartCount, onCartOpen, onSearchOpen }) {
             FITSTICH<span className="text-neutral-300">.</span>
           </button>
           <nav className="hidden lg:flex items-center gap-8 relative">
-            {menu.map((m) => (
-              <div key={m.key} onMouseEnter={() => m.mega && setMegaOpen(m.key)} onMouseLeave={() => setMegaOpen(null)} className="relative">
-                <button onClick={() => handleClick(m)} className="text-[13px] uppercase tracking-[0.15em] font-medium hover:text-neutral-500 transition-colors py-2">
-                  {m.label}
+            <div className="flex items-center gap-1 border border-neutral-200 rounded-full p-0.5">
+              {[GENDERS.MEN, GENDERS.WOMEN].map((g) => (
+                <button key={g} onClick={() => handleGenderClick(g)}
+                  className={cx('px-5 py-1.5 text-[12px] uppercase tracking-[0.15em] font-medium rounded-full transition-all',
+                    activeGender === g ? 'bg-black text-white' : 'text-neutral-600 hover:text-black')}>
+                  {GENDER_LABELS[g]}
                 </button>
-                <AnimatePresence>
-                  {m.mega && megaOpen === m.key && (
-                    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }} transition={{ duration: 0.2 }} className="absolute top-full left-1/2 -translate-x-1/2 pt-4">
-                      <div className="bg-white shadow-luxe border border-neutral-100 rounded-md p-6 min-w-[280px]">
-                        <div className="text-[10px] uppercase tracking-[0.2em] text-neutral-400 mb-3">Categories</div>
-                        <div className="flex flex-col gap-1">
-                          {m.mega.map((c) => (
-                            <button key={c.key} onClick={() => onNav({ view: 'shop', category: c.key })} className="text-left text-sm py-2 hover:pl-2 transition-all text-neutral-800">
-                              {c.label}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            ))}
+              ))}
+            </div>
+            <div className="w-px h-5 bg-neutral-200" />
+            <div className="flex items-center gap-6">
+              {CATEGORIES.map((c) => (
+                <button key={c.key} onClick={() => onNav({ view: 'shop', gender: activeGender || GENDERS.MEN, category: c.key })}
+                  className="text-[12px] uppercase tracking-[0.15em] font-medium text-neutral-600 hover:text-black transition-colors py-2">
+                  {c.label}
+                </button>
+              ))}
+            </div>
+            <div className="w-px h-5 bg-neutral-200" />
+            <button onClick={() => onNav({ view: 'shop', tag: 'new', gender: activeGender || GENDERS.MEN })} className="text-[12px] uppercase tracking-[0.15em] font-medium text-neutral-600 hover:text-black transition-colors py-2">New</button>
+            <button onClick={() => onNav({ view: 'shop', tag: 'best-seller', gender: activeGender || GENDERS.MEN })} className="text-[12px] uppercase tracking-[0.15em] font-medium text-neutral-600 hover:text-black transition-colors py-2">Best Sellers</button>
           </nav>
           <div className="flex items-center gap-4 lg:gap-5">
             <button aria-label="search" onClick={onSearchOpen} className="hover:opacity-60"><Search className="w-5 h-5" /></button>
@@ -138,18 +129,32 @@ function Navbar({ onNav, cartCount, onCartOpen, onSearchOpen }) {
       <AnimatePresence>
         {mobileOpen && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 bg-black/40" onClick={() => setMobileOpen(false)}>
-            <motion.div initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} transition={{ type: 'tween', duration: 0.35 }} onClick={(e) => e.stopPropagation()} className="absolute left-0 top-0 h-full w-[85%] max-w-sm bg-white p-6">
-              <div className="flex justify-between items-center mb-8">
+            <motion.div initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} transition={{ type: 'tween', duration: 0.35 }} onClick={(e) => e.stopPropagation()} className="absolute left-0 top-0 h-full w-[85%] max-w-sm bg-white p-6 overflow-y-auto">
+              <div className="flex justify-between items-center mb-6">
                 <span className="font-black text-xl tracking-tight">FITSTICH.</span>
                 <button onClick={() => setMobileOpen(false)}><X className="w-5 h-5" /></button>
               </div>
-              <nav className="flex flex-col gap-1">
-                {menu.map((m) => (
-                  <button key={m.key} onClick={() => { setMobileOpen(false); handleClick(m); }} className="text-left py-3 border-b border-neutral-100 uppercase text-sm tracking-widest">
-                    {m.label}
+              <div className="flex gap-2 mb-6">
+                {[GENDERS.MEN, GENDERS.WOMEN].map((g) => (
+                  <button key={g} onClick={() => { setMobileOpen(false); handleGenderClick(g); }}
+                    className={cx('flex-1 py-2 text-xs uppercase tracking-widest border', activeGender === g ? 'bg-black text-white border-black' : 'border-neutral-200')}>
+                    {GENDER_LABELS[g]}
+                  </button>
+                ))}
+              </div>
+              <div className="text-[10px] uppercase tracking-[0.2em] text-neutral-400 mb-2">Categories</div>
+              <nav className="flex flex-col gap-1 mb-6">
+                {CATEGORIES.map((c) => (
+                  <button key={c.key} onClick={() => { setMobileOpen(false); onNav({ view: 'shop', gender: activeGender || GENDERS.MEN, category: c.key }); }}
+                    className="text-left py-3 border-b border-neutral-100 uppercase text-sm tracking-widest">
+                    {c.label}
                   </button>
                 ))}
               </nav>
+              <div className="border-t border-neutral-100 pt-4 space-y-2">
+                <button onClick={() => { setMobileOpen(false); onNav({ view: 'shop', tag: 'new', gender: activeGender || GENDERS.MEN }); }} className="block text-sm py-2">New Arrivals</button>
+                <button onClick={() => { setMobileOpen(false); onNav({ view: 'shop', tag: 'best-seller', gender: activeGender || GENDERS.MEN }); }} className="block text-sm py-2">Best Sellers</button>
+              </div>
             </motion.div>
           </motion.div>
         )}
@@ -220,8 +225,8 @@ function Hero({ onNav }) {
             <h1 className="font-display font-black text-[13vw] lg:text-[6.5vw] leading-[0.9] tracking-[-0.05em] mb-6">WEAR<br/>CONFIDENCE.</h1>
             <p className="text-neutral-600 text-base md:text-lg leading-relaxed max-w-md mb-10">Premium everyday essentials. Manufactured in-house, engineered to outlast trends.</p>
             <div className="flex flex-wrap gap-3">
-              <Button onClick={() => onNav({ view: 'shop' })} className="h-12 px-8 rounded-none bg-black hover:bg-neutral-800 text-white text-xs uppercase tracking-[0.2em]">Shop Now <ArrowRight className="w-4 h-4 ml-2" /></Button>
-              <Button variant="outline" onClick={() => onNav({ view: 'shop', tag: 'new' })} className="h-12 px-8 rounded-none border-black text-black hover:bg-black hover:text-white text-xs uppercase tracking-[0.2em]">Explore Collection</Button>
+              <Button onClick={() => onNav({ view: 'shop', gender: 'men' })} className="h-12 px-8 rounded-none bg-black hover:bg-neutral-800 text-white text-xs uppercase tracking-[0.2em]">Shop Men <ArrowRight className="w-4 h-4 ml-2" /></Button>
+              <Button variant="outline" onClick={() => onNav({ view: 'shop', gender: 'women' })} className="h-12 px-8 rounded-none border-black text-black hover:bg-black hover:text-white text-xs uppercase tracking-[0.2em]">Shop Women</Button>
             </div>
           </motion.div>
         </div>
@@ -236,30 +241,29 @@ function Hero({ onNav }) {
 
 function CategoryCards({ onNav }) {
   const cards = [
-    { key: 'oversized', label: 'Oversized Tees', img: 'https://images.pexels.com/photos/26524780/pexels-photo-26524780.jpeg' },
-    { key: 'joggers', label: 'Joggers', img: 'https://images.pexels.com/photos/16238583/pexels-photo-16238583.jpeg' },
-    { key: 'pyjamas', label: 'Pyjamas', img: 'https://images.pexels.com/photos/8346048/pexels-photo-8346048.jpeg' },
+    { gender: GENDERS.MEN, label: 'Men', img: 'https://images.pexels.com/photos/7945666/pexels-photo-7945666.jpeg', subtitle: 'Oversized · Regular · Joggers · Pyjamas' },
+    { gender: GENDERS.WOMEN, label: 'Women', img: 'https://images.pexels.com/photos/6626903/pexels-photo-6626903.jpeg', subtitle: 'Oversized · Regular · Joggers · Pyjamas' },
   ];
   return (
     <section className="py-20 lg:py-28 px-5 lg:px-10 max-w-[1400px] mx-auto">
       <div className="flex items-end justify-between mb-10">
         <div>
           <div className="text-xs uppercase tracking-[0.3em] text-neutral-400 mb-2">The Collection</div>
-          <h2 className="font-display font-black text-4xl lg:text-6xl tracking-[-0.04em]">Shop by category</h2>
+          <h2 className="font-display font-black text-4xl lg:text-6xl tracking-[-0.04em]">Shop by gender</h2>
         </div>
       </div>
-      <div className="grid md:grid-cols-3 gap-4 lg:gap-6">
+      <div className="grid md:grid-cols-2 gap-4 lg:gap-6">
         {cards.map((c, i) => (
-          <motion.button key={c.key} onClick={() => onNav({ view: 'shop', category: c.key })}
+          <motion.button key={c.gender} onClick={() => onNav({ view: 'shop', gender: c.gender })}
             initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7, delay: i * 0.1 }}
-            className="group relative overflow-hidden zoom-parent block text-left">
-            <div className="aspect-[3/4] bg-neutral-100 overflow-hidden">
+            className="group relative overflow-hidden zoom-parent block text-left min-h-[50vh] lg:min-h-[65vh]">
+            <div className="absolute inset-0 bg-neutral-100 overflow-hidden">
               <img src={c.img} alt={c.label} className="zoom-child w-full h-full object-cover" />
             </div>
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-            <div className="absolute bottom-6 left-6 right-6 flex items-end justify-between text-white">
-              <h3 className="font-display font-bold text-2xl lg:text-3xl tracking-tight">{c.label}</h3>
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+            <div className="absolute bottom-8 left-8 right-8 text-white">
+              <h3 className="font-display font-bold text-4xl lg:text-5xl tracking-tight mb-2">{c.label}</h3>
+              <p className="text-sm text-white/70 uppercase tracking-widest">{c.subtitle}</p>
             </div>
           </motion.button>
         ))}
@@ -307,35 +311,35 @@ function ProductCard({ product, onNav, onQuickAdd }) {
   );
 }
 
-function FeaturedGrid({ products, onNav, onQuickAdd }) {
+function FeaturedGrid({ products, onNav, onQuickAdd, title = 'Best sellers', tag = 'best-seller', gender = GENDERS.MEN }) {
   return (
-    <section className="py-20 px-5 lg:px-10 max-w-[1400px] mx-auto">
-      <div className="flex items-end justify-between mb-10">
+    <section className="py-16 lg:py-20 px-5 lg:px-10 max-w-[1400px] mx-auto">
+      <div className="flex items-end justify-between mb-8">
         <div>
-          <div className="text-xs uppercase tracking-[0.3em] text-neutral-400 mb-2">Featured</div>
-          <h2 className="font-display font-black text-4xl lg:text-6xl tracking-[-0.04em]">Best sellers</h2>
+          <div className="text-xs uppercase tracking-[0.3em] text-neutral-400 mb-2">{gender === GENDERS.MEN ? "Men's" : "Women's"} Featured</div>
+          <h2 className="font-display font-black text-3xl lg:text-5xl tracking-[-0.04em]">{title}</h2>
         </div>
-        <button onClick={() => onNav({ view: 'shop', tag: 'best-seller' })} className="hidden md:flex items-center gap-2 text-xs uppercase tracking-widest hover:gap-3 transition-all">
+        <button onClick={() => onNav({ view: 'shop', tag, gender })} className="hidden md:flex items-center gap-2 text-xs uppercase tracking-widest hover:gap-3 transition-all">
           View all <ArrowRight className="w-4 h-4" />
         </button>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-8">
-        {products.slice(0, 8).map(p => <ProductCard key={p.id} product={p} onNav={onNav} onQuickAdd={onQuickAdd} />)}
+        {products.slice(0, 4).map(p => <ProductCard key={p.id} product={p} onNav={onNav} onQuickAdd={onQuickAdd} />)}
       </div>
     </section>
   );
 }
 
-function TrendingSlider({ products, onNav, onQuickAdd }) {
+function TrendingSlider({ products, onNav, onQuickAdd, title = 'Just dropped' }) {
   const scroller = useRef(null);
   const scroll = (dir) => { if (scroller.current) scroller.current.scrollBy({ left: dir * 400, behavior: 'smooth' }); };
   return (
-    <section className="py-20 bg-neutral-50">
+    <section className="py-16 lg:py-20 bg-neutral-50">
       <div className="max-w-[1400px] mx-auto px-5 lg:px-10">
-        <div className="flex items-end justify-between mb-10">
+        <div className="flex items-end justify-between mb-8">
           <div>
             <div className="text-xs uppercase tracking-[0.3em] text-neutral-400 mb-2">Trending Now</div>
-            <h2 className="font-display font-black text-4xl lg:text-6xl tracking-[-0.04em]">Just dropped</h2>
+            <h2 className="font-display font-black text-3xl lg:text-5xl tracking-[-0.04em]">{title}</h2>
           </div>
           <div className="hidden md:flex gap-2">
             <button onClick={() => scroll(-1)} className="w-11 h-11 rounded-full border border-neutral-300 hover:bg-black hover:text-white transition flex items-center justify-center"><ChevronLeft className="w-4 h-4" /></button>
@@ -420,16 +424,20 @@ function Footer({ onNav }) {
           </div>
         </div>
         {[
-          { title: 'Shop', links: [['Oversized','oversized'],['Regular','regular'],['Joggers','joggers'],['Pyjamas','pyjamas']] },
+          { title: 'Men', links: [['Oversized Tees', GENDERS.MEN, 'oversized'],['Regular Tees', GENDERS.MEN, 'regular'],['Joggers', GENDERS.MEN, 'joggers'],['Pyjamas', GENDERS.MEN, 'pyjamas']] },
+          { title: 'Women', links: [['Oversized Tees', GENDERS.WOMEN, 'oversized'],['Regular Tees', GENDERS.WOMEN, 'regular'],['Joggers', GENDERS.WOMEN, 'joggers'],['Pyjamas', GENDERS.WOMEN, 'pyjamas']] },
           { title: 'Help', links: [['Track Order','/orders'],['Shipping','/shipping'],['Returns','/returns'],['Size Guide','/shipping'],['Contact','mailto:support@fitstich.com']] },
           { title: 'Company', links: [['About','/#about'],['Careers','/#careers'],['Privacy','/privacy'],['Terms','/terms']] },
         ].map(col => (
           <div key={col.title}>
             <div className="text-xs uppercase tracking-[0.2em] mb-4 text-neutral-400">{col.title}</div>
             <ul className="space-y-2">
-              {col.links.map(([label, href]) => (
-                <li key={label}>{href?.startsWith('/') ? <a href={href} className="text-sm text-neutral-700 hover:text-black">{label}</a> : <button onClick={() => href && onNav({ view: 'shop', category: href })} className="text-sm text-neutral-700 hover:text-black">{label}</button>}</li>
-              ))}
+              {col.links.map(([label, ...rest]) => {
+                if (rest.length === 1 && typeof rest[0] === 'string' && rest[0].startsWith('/')) return <li key={label}><a href={rest[0]} className="text-sm text-neutral-700 hover:text-black">{label}</a></li>;
+                if (rest.length === 1 && typeof rest[0] === 'string' && rest[0].startsWith('mailto:')) return <li key={label}><a href={rest[0]} className="text-sm text-neutral-700 hover:text-black">{label}</a></li>;
+                const [gender, category] = rest;
+                return <li key={label}><button onClick={() => onNav({ view: 'shop', gender, category })} className="text-sm text-neutral-700 hover:text-black">{label}</button></li>;
+              })}
             </ul>
           </div>
         ))}
@@ -442,7 +450,8 @@ function Footer({ onNav }) {
   );
 }
 
-function ShopPage({ products, onNav, onQuickAdd, initialCategory, initialTag }) {
+function ShopPage({ products, onNav, onQuickAdd, initialGender, initialCategory, initialTag }) {
+  const [gender, setGender] = useState(initialGender || GENDERS.MEN);
   const [category, setCategory] = useState(initialCategory || 'all');
   const [tag, setTag] = useState(initialTag || null);
   const [sizes, setSizes] = useState([]);
@@ -453,6 +462,7 @@ function ShopPage({ products, onNav, onQuickAdd, initialCategory, initialTag }) 
 
   const filtered = useMemo(() => {
     let list = products.slice();
+    if (gender) list = list.filter(p => p.gender === gender);
     if (category !== 'all') list = list.filter(p => p.category === category);
     if (tag) list = list.filter(p => p.tags?.includes(tag));
     if (sizes.length) list = list.filter(p => p.sizes.some(s => sizes.includes(s)));
@@ -462,7 +472,7 @@ function ShopPage({ products, onNav, onQuickAdd, initialCategory, initialTag }) 
     else if (sort === 'price-high') list.sort((a,b) => b.price - a.price);
     else if (sort === 'popular') list.sort((a,b) => b.reviewCount - a.reviewCount);
     return list;
-  }, [products, category, tag, sizes, colors, price, sort]);
+  }, [products, gender, category, tag, sizes, colors, price, sort]);
 
   const toggle = (arr, setter, val) => setter(arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val]);
 
@@ -504,9 +514,18 @@ function ShopPage({ products, onNav, onQuickAdd, initialCategory, initialTag }) 
 
   return (
     <div className="max-w-[1400px] mx-auto px-5 lg:px-10 py-12">
+      <div className="flex items-center gap-3 mb-8">
+        {[GENDERS.MEN, GENDERS.WOMEN].map((g) => (
+          <button key={g} onClick={() => { setGender(g); setCategory('all'); setTag(null); }}
+            className={cx('px-6 py-2 text-xs uppercase tracking-[0.2em] font-medium border transition-all',
+              gender === g ? 'bg-black text-white border-black' : 'border-neutral-200 text-neutral-600 hover:border-black')}>
+            {GENDER_LABELS[g]}
+          </button>
+        ))}
+      </div>
       <div className="mb-10">
-        <div className="text-xs uppercase tracking-[0.3em] text-neutral-400 mb-2">Shop {tag ? `· ${tag.replace('-', ' ')}` : ''}</div>
-        <h1 className="font-display font-black text-4xl lg:text-6xl tracking-[-0.04em]">{category === 'all' ? 'All Essentials' : CATEGORIES.find(c => c.key === category)?.label || 'Shop'}</h1>
+        <div className="text-xs uppercase tracking-[0.3em] text-neutral-400 mb-2">{GENDER_LABELS[gender]} {tag ? `· ${tag.replace('-', ' ')}` : ''}</div>
+        <h1 className="font-display font-black text-4xl lg:text-6xl tracking-[-0.04em]">{category === 'all' ? `All ${GENDER_LABELS[gender]}'s Essentials` : CATEGORIES.find(c => c.key === category)?.label || 'Shop'}</h1>
       </div>
       <div className="flex justify-between items-center mb-6 gap-3">
         <button onClick={() => setFilterOpen(true)} className="lg:hidden flex items-center gap-2 border border-neutral-200 px-4 py-2 text-sm"><SlidersHorizontal className="w-4 h-4" /> Filters</button>
@@ -810,27 +829,33 @@ function App() {
 
   useEffect(() => { window.scrollTo({ top: 0, behavior: 'instant' }); }, [nav]);
 
-  const onNav = useCallback((n) => setNav(n), []);
-  const bestSellers = [...new Map(products.filter(p => p.tags?.includes('best-seller')).concat(products).map(p => [p.id, p])).values()].slice(0, 8);
-  const trending = products.filter(p => p.tags?.includes('trending') || p.tags?.includes('new'));
+  const onNav = useCallback((n) => { setNav(prev => ({ ...prev, ...n })); }, []);
+  const activeGender = nav.gender || GENDERS.MEN;
+  const byGender = (g) => products.filter(p => p.gender === g);
+  const menBestSellers = [...new Map(byGender(GENDERS.MEN).filter(p => p.tags?.includes('best-seller')).concat(byGender(GENDERS.MEN)).map(p => [p.id, p])).values()].slice(0, 4);
+  const womenBestSellers = [...new Map(byGender(GENDERS.WOMEN).filter(p => p.tags?.includes('best-seller')).concat(byGender(GENDERS.WOMEN)).map(p => [p.id, p])).values()].slice(0, 4);
+  const menTrending = byGender(GENDERS.MEN).filter(p => p.tags?.includes('trending') || p.tags?.includes('new'));
+  const womenTrending = byGender(GENDERS.WOMEN).filter(p => p.tags?.includes('trending') || p.tags?.includes('new'));
 
   return (
     <div className="min-h-screen flex flex-col">
       <AnnouncementBar />
-      <Navbar onNav={onNav} cartCount={cart.totalQty} onCartOpen={() => setCartOpen(true)} onSearchOpen={() => setSearchOpen(true)} />
+      <Navbar onNav={onNav} cartCount={cart.totalQty} onCartOpen={() => setCartOpen(true)} onSearchOpen={() => setSearchOpen(true)} activeGender={activeGender} />
       <main className="flex-1">
         {nav.view === 'home' && (
           <>
             <Hero onNav={onNav} />
             <ValueProps />
             <CategoryCards onNav={onNav} />
-            <FeaturedGrid products={bestSellers} onNav={onNav} onQuickAdd={setQuickAdd} />
-            <TrendingSlider products={trending.length ? trending : products} onNav={onNav} onQuickAdd={setQuickAdd} />
+            <FeaturedGrid products={menBestSellers} title="Men's best sellers" tag="best-seller" gender={GENDERS.MEN} onNav={onNav} onQuickAdd={setQuickAdd} />
+            <FeaturedGrid products={womenBestSellers} title="Women's best sellers" tag="best-seller" gender={GENDERS.WOMEN} onNav={onNav} onQuickAdd={setQuickAdd} />
+            <TrendingSlider products={menTrending.length ? menTrending : byGender(GENDERS.MEN)} title="Men's trending" onNav={onNav} onQuickAdd={setQuickAdd} />
+            <TrendingSlider products={womenTrending.length ? womenTrending : byGender(GENDERS.WOMEN)} title="Women's trending" onNav={onNav} onQuickAdd={setQuickAdd} />
             <Newsletter />
           </>
         )}
         {nav.view === 'shop' && !loading && (
-          <ShopPage products={products} onNav={onNav} onQuickAdd={setQuickAdd} initialCategory={nav.category} initialTag={nav.tag} />
+          <ShopPage products={products} onNav={onNav} onQuickAdd={setQuickAdd} initialGender={nav.gender} initialCategory={nav.category} initialTag={nav.tag} />
         )}
         {nav.view === 'product' && (
           <ProductPage productId={nav.productId} onNav={onNav} cart={cart} />
