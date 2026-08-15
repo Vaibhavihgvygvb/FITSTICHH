@@ -2,68 +2,407 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===========================================================================
+   FITSTICH — THE DRAFTING TABLE
+   The site is the pattern the garment is cut from.
+   Two grounds, both earned: ink on paper (drafting) and chalk on cloth (cutting).
+   =========================================================================== */
+
 @layer base {
   :root {
+    /* --- Grounds --- */
+    --paper: #ffffff;
+    --paper-2: #f4f4f2;
+    --cloth: #0b0b0b;
+    --cloth-2: #171717;
+
+    /* --- Marks --- */
+    --ink: #0b0b0b;
+    --graphite: #626262;      /* 6.4:1 on paper */
+    --chalk: #ffffff;
+    --chalk-dim: #a6a6a6;     /* 7.3:1 on cloth */
+
+    /* --- Rules: the drawn lines of the sheet --- */
+    --rule-hair: #e2e2df;
+    --rule-thin: #cfcfcb;
+    --rule-heavy: #0b0b0b;
+
+    /* --- Line weights. Hierarchy lives here, not in colour. --- */
+    --w-hair: 1px;
+    --w-thin: 1.5px;
+    --w-cut: 2.5px;
+
+    /* --- Sheet pitch. Fixed. Never scales with content. --- */
+    --pitch-minor: 8px;
+    --pitch-major: 48px;
+
+    /* --- Motion --- */
+    --ease-draft: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-snap: cubic-bezier(0.32, 0.72, 0, 1);
+
+    /* shadcn bridge — kept so the primitives still resolve */
     --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
+    --foreground: 0 0% 4%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
+    --card-foreground: 0 0% 4%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-    --radius: 0.25rem;
+    --popover-foreground: 0 0% 4%;
+    --primary: 0 0% 4%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 95%;
+    --secondary-foreground: 0 0% 4%;
+    --muted: 0 0% 95%;
+    --muted-foreground: 0 0% 38%;
+    --accent: 0 0% 95%;
+    --accent-foreground: 0 0% 4%;
+    --destructive: 0 0% 4%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 88%;
+    --input: 0 0% 88%;
+    --ring: 0 0% 4%;
+    --radius: 0px;
   }
 }
 
 * {
-  border-color: hsl(var(--border));
+  border-color: var(--rule-thin);
 }
 
-html, body {
-  background: #ffffff;
-  color: #000000;
+html {
+  background: var(--paper);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-archivo), "Helvetica Neue", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "kern" 1, "liga" 1;
+  overflow-x: hidden;
 }
 
-.font-display {
-  font-family: var(--font-inter), 'Helvetica Neue', Arial, sans-serif;
-  letter-spacing: -0.03em;
+/* --- Browser surfaces. The parts we did not draw still carry the design. --- */
+::selection {
+  background: var(--ink);
+  color: var(--paper);
+}
+.on-cloth ::selection {
+  background: var(--chalk);
+  color: var(--cloth);
 }
 
-/* Hide scrollbar for horizontal sliders */
-.no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-/* Soft luxe shadow */
-.shadow-luxe {
-  box-shadow: 0 1px 2px rgba(0,0,0,0.03), 0 8px 30px rgba(0,0,0,0.04);
+:root {
+  scrollbar-color: var(--graphite) var(--paper-2);
+  scrollbar-width: thin;
+  accent-color: var(--ink);
+  caret-color: var(--ink);
+}
+::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+::-webkit-scrollbar-track {
+  background: var(--paper-2);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--graphite);
+  border: 3px solid var(--paper-2);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ink);
 }
 
-/* Marquee */
+:focus-visible {
+  outline: var(--w-thin) solid var(--ink);
+  outline-offset: 3px;
+}
+.on-cloth :focus-visible {
+  outline-color: var(--chalk);
+}
+
+a {
+  text-underline-offset: 0.28em;
+  text-decoration-thickness: 1px;
+}
+
+/* Every number on this site is a measurement. Line them up. */
+.tnum,
+input[type="number"],
+td.num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* ===========================================================================
+   THE SHEET — a drafting ground, ruled at fixed pitch
+   =========================================================================== */
+
+.sheet {
+  position: relative;
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(to right, var(--rule-hair) var(--w-hair), transparent var(--w-hair)),
+    linear-gradient(to bottom, var(--rule-hair) var(--w-hair), transparent var(--w-hair));
+  background-size: var(--pitch-major) var(--pitch-major);
+  background-position: 0 0;
+}
+
+.sheet-fine {
+  background-image:
+    linear-gradient(to right, var(--rule-hair) var(--w-hair), transparent var(--w-hair)),
+    linear-gradient(to bottom, var(--rule-hair) var(--w-hair), transparent var(--w-hair)),
+    linear-gradient(to right, #f2f2f0 var(--w-hair), transparent var(--w-hair)),
+    linear-gradient(to bottom, #f2f2f0 var(--w-hair), transparent var(--w-hair));
+  background-size:
+    var(--pitch-major) var(--pitch-major),
+    var(--pitch-major) var(--pitch-major),
+    var(--pitch-minor) var(--pitch-minor),
+    var(--pitch-minor) var(--pitch-minor);
+}
+
+.cloth {
+  background-color: var(--cloth);
+  color: var(--chalk);
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.06) var(--w-hair), transparent var(--w-hair)),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.06) var(--w-hair), transparent var(--w-hair));
+  background-size: var(--pitch-major) var(--pitch-major);
+}
+
+/* Paper tooth. Fixed pitch — it is the stock, not a filter on the content. */
+.tooth::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(11, 11, 11, 0.028) 0 1px, transparent 1px 3px);
+  background-size: 3px 3px;
+}
+
+/* ===========================================================================
+   ANNOTATION — the drafting voice
+   =========================================================================== */
+
+.annot {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 10px;
+  line-height: 1;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+
+.annot-lg {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+
+.display {
+  font-family: var(--font-archivo), "Helvetica Neue", Arial, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 0.88;
+  text-wrap: balance;
+}
+
+.measure {
+  max-width: 68ch;
+}
+
+/* ===========================================================================
+   DOC — the specification sheet's reading voice. Read mode: comprehension first.
+   =========================================================================== */
+
+.doc {
+  max-width: 68ch;
+}
+.doc p {
+  margin-top: 1.15rem;
+  font-size: 15.5px;
+  line-height: 1.75;
+  color: var(--graphite);
+}
+.doc h2 {
+  margin-top: 3rem;
+  margin-bottom: 0.35rem;
+  padding-bottom: 0.6rem;
+  border-bottom: var(--w-hair) solid rgba(11, 11, 11, 0.18);
+  font-family: var(--font-archivo), sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.doc h2 + p {
+  margin-top: 1rem;
+}
+.doc ul {
+  margin-top: 1rem;
+  padding-left: 1.1rem;
+  list-style: none;
+}
+.doc li {
+  position: relative;
+  margin-top: 0.6rem;
+  font-size: 15.5px;
+  line-height: 1.7;
+  color: var(--graphite);
+}
+.doc li::before {
+  content: "";
+  position: absolute;
+  left: -1.1rem;
+  top: 0.62em;
+  width: 6px;
+  height: var(--w-hair);
+  background: var(--ink);
+}
+.doc a {
+  color: var(--ink);
+  text-decoration: underline;
+}
+.doc strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* ===========================================================================
+   LINE-FORM STATE — state is the form of the line, never a hue
+   (raise donated by the emission-line rail)
+   =========================================================================== */
+
+.state-stocked {
+  border-style: solid;
+  border-color: var(--ink);
+}
+.state-made {
+  border-style: dashed;
+  border-color: var(--ink);
+}
+.state-low {
+  border-style: solid;
+  border-color: var(--graphite);
+}
+.state-out {
+  border-style: solid;
+  border-color: var(--rule-thin);
+  color: var(--graphite);
+}
+.state-out .piece-name {
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+/* ===========================================================================
+   NOTCH — the punched register mark, used as the site's only "corner"
+   =========================================================================== */
+
+.notched {
+  --notch: 12px;
+  clip-path: polygon(
+    var(--notch) 0,
+    calc(100% - var(--notch)) 0,
+    100% var(--notch),
+    100% calc(100% - var(--notch)),
+    calc(100% - var(--notch)) 100%,
+    var(--notch) 100%,
+    0 calc(100% - var(--notch)),
+    0 var(--notch)
+  );
+}
+
+/* ===========================================================================
+   CUT LINE — the animated dashed path a cutter follows
+   =========================================================================== */
+
+@keyframes cut-crawl {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+.cut-line {
+  stroke-dasharray: 6 6;
+  animation: cut-crawl 1.6s linear infinite;
+}
+
+@keyframes rule-sweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Marquee — the cutting-table ticker */
 @keyframes marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
 }
 .animate-marquee {
-  animation: marquee 40s linear infinite;
+  animation: marquee 46s linear infinite;
+  will-change: transform;
 }
 
-/* Image zoom on hover */
+/* The one authored entrance: a drawn line resolving into its piece. */
+@keyframes draft-in {
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+    clip-path: inset(0 100% 0 0);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    clip-path: inset(0 0 0 0);
+  }
+}
+.draft-in {
+  animation: draft-in 0.9s var(--ease-draft) both;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 .zoom-parent:hover .zoom-child {
-  transform: scale(1.06);
+  transform: scale(1.04);
 }
 .zoom-child {
-  transition: transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 1100ms var(--ease-draft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .animate-marquee {
+    animation: none;
+  }
+  .cut-line {
+    animation: none;
+  }
 }

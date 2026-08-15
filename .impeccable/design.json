@@ -1,0 +1,233 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-15T00:00:00.000Z",
+  "title": "Design System: FITSTICH",
+  "extensions": {
+    "colorMeta": {
+      "ink": {
+        "role": "primary",
+        "displayName": "Drafting Ink",
+        "canonical": "#0b0b0b",
+        "tonalRamp": ["oklch(15% 0 0)", "oklch(24% 0 0)", "oklch(33% 0 0)", "oklch(45% 0 0)", "oklch(57% 0 0)", "oklch(69% 0 0)", "oklch(82% 0 0)", "oklch(95% 0 0)"]
+      },
+      "chalk": {
+        "role": "primary",
+        "displayName": "Tailor's Chalk",
+        "canonical": "#ffffff",
+        "tonalRamp": ["oklch(15% 0 0)", "oklch(24% 0 0)", "oklch(33% 0 0)", "oklch(45% 0 0)", "oklch(57% 0 0)", "oklch(69% 0 0)", "oklch(82% 0 0)", "oklch(95% 0 0)"]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Sheet Paper",
+        "canonical": "#ffffff",
+        "tonalRamp": ["oklch(15% 0 0)", "oklch(25% 0 0)", "oklch(36% 0 0)", "oklch(48% 0 0)", "oklch(60% 0 0)", "oklch(72% 0 0)", "oklch(85% 0 0)", "oklch(97% 0 0)"]
+      },
+      "paper-2": {
+        "role": "neutral",
+        "displayName": "Paper Sub",
+        "canonical": "#f4f4f2",
+        "tonalRamp": ["oklch(15% 0.002 100)", "oklch(25% 0.002 100)", "oklch(36% 0.002 100)", "oklch(48% 0.002 100)", "oklch(60% 0.002 100)", "oklch(73% 0.002 100)", "oklch(86% 0.002 100)", "oklch(96% 0.002 100)"]
+      },
+      "cloth": {
+        "role": "neutral",
+        "displayName": "Laid Cloth",
+        "canonical": "#0b0b0b",
+        "tonalRamp": ["oklch(15% 0 0)", "oklch(24% 0 0)", "oklch(33% 0 0)", "oklch(45% 0 0)", "oklch(57% 0 0)", "oklch(69% 0 0)", "oklch(82% 0 0)", "oklch(95% 0 0)"]
+      },
+      "cloth-2": {
+        "role": "neutral",
+        "displayName": "Cloth Raise",
+        "canonical": "#171717",
+        "tonalRamp": ["oklch(16% 0 0)", "oklch(25% 0 0)", "oklch(34% 0 0)", "oklch(46% 0 0)", "oklch(58% 0 0)", "oklch(70% 0 0)", "oklch(83% 0 0)", "oklch(95% 0 0)"]
+      },
+      "graphite": {
+        "role": "neutral",
+        "displayName": "Graphite",
+        "canonical": "#626262",
+        "tonalRamp": ["oklch(15% 0 0)", "oklch(25% 0 0)", "oklch(35% 0 0)", "oklch(46% 0 0)", "oklch(57% 0 0)", "oklch(69% 0 0)", "oklch(82% 0 0)", "oklch(95% 0 0)"]
+      },
+      "chalk-dim": {
+        "role": "neutral",
+        "displayName": "Dim Chalk",
+        "canonical": "#a6a6a6",
+        "tonalRamp": ["oklch(16% 0 0)", "oklch(26% 0 0)", "oklch(37% 0 0)", "oklch(48% 0 0)", "oklch(60% 0 0)", "oklch(72% 0 0)", "oklch(84% 0 0)", "oklch(95% 0 0)"]
+      },
+      "rule-hair": {
+        "role": "neutral",
+        "displayName": "Hairline Rule",
+        "canonical": "#e2e2df",
+        "tonalRamp": ["oklch(16% 0.003 100)", "oklch(26% 0.003 100)", "oklch(37% 0.003 100)", "oklch(49% 0.003 100)", "oklch(61% 0.003 100)", "oklch(73% 0.003 100)", "oklch(85% 0.003 100)", "oklch(96% 0.003 100)"]
+      },
+      "rule-thin": {
+        "role": "neutral",
+        "displayName": "Thin Rule",
+        "canonical": "#cfcfcb",
+        "tonalRamp": ["oklch(16% 0.004 100)", "oklch(26% 0.004 100)", "oklch(37% 0.004 100)", "oklch(49% 0.004 100)", "oklch(61% 0.004 100)", "oklch(73% 0.004 100)", "oklch(85% 0.004 100)", "oklch(96% 0.004 100)"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "The hero statement on the sheet. One per page. Archivo 800, sub-1 line height, tight negative tracking, balanced wrap." },
+      "headline": { "displayName": "Headline", "purpose": "Large numerals and short marks on the cloth ground, and the wordmark. Archivo 900." },
+      "title": { "displayName": "Title", "purpose": "Section subheads and column heads. Product names sit one step below at 15px/600 and never change with rank." },
+      "body": { "displayName": "Body", "purpose": "Reading copy in graphite, capped at 68ch." },
+      "label": { "displayName": "Annotation", "purpose": "The drafting voice — every spec, unit, category, state, and stamp. Mono, uppercase, wide tracking, tabular numerals." },
+      "label-lg": { "displayName": "Annotation Large", "purpose": "Marks that sit on a rule: section rules, standing labels, out-of-stock stamps." }
+    },
+    "lineWeights": [
+      { "name": "hair", "value": "1px", "purpose": "The sheet's own ruling and quiet dividers. Never an interactive edge." },
+      { "name": "thin", "value": "1.5px", "purpose": "A drawn edge on a real element: buttons, inputs, chips, title blocks, piece frames." },
+      { "name": "cut", "value": "2.5px", "purpose": "A cut line: boundaries between grounds, the escalated low-stock frame, the focused input's rule." }
+    ],
+    "shadows": [
+      { "name": "sheet-lift", "value": "0 1px 0 0 rgba(11,11,11,0.14), 0 10px 28px -18px rgba(11,11,11,0.3)", "purpose": "The only shadow in the system. Sticky header past 24px of scroll, faded in over 500ms. The hairline carries the separation; the diffuse half keeps it from reading as a stray rule." }
+    ],
+    "motion": [
+      { "name": "ease-draft", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Default easing. Anything that settles like a piece dropped on a table." },
+      { "name": "ease-snap", "value": "cubic-bezier(0.32, 0.72, 0, 1)", "purpose": "Anything that engages rather than settles." },
+      { "name": "state", "value": "200-300ms", "purpose": "Colour and border-weight transitions on controls." },
+      { "name": "image-settle", "value": "500ms", "purpose": "Photograph cross-fading over its drawn block once decoded." },
+      { "name": "window-zoom", "value": "1100ms scale(1.04)", "purpose": "Slow push on a photograph inside its punched window on hover." },
+      { "name": "draft-in", "value": "900ms ease-draft, clip-path inset(0 100% 0 0) to inset(0)", "purpose": "The one authored entrance: a drawn line resolving into its piece." },
+      { "name": "cut-crawl", "value": "1.6s linear, stroke-dasharray 6 6", "purpose": "A cutter following a dashed path." },
+      { "name": "marquee", "value": "46s linear", "purpose": "The cutting-table ticker above the header." },
+      { "name": "fold-cycle", "value": "14s (18% flat, 24% fold, 30% worn, 20% unfold)", "purpose": "The WebGL pattern fold in the hero. Pauses off-screen; renders one settled frame under reduced motion." },
+      { "name": "reduced-motion", "value": "all animation and transition clamped to 0.01ms; marquee and cut-crawl off", "purpose": "Global honour of prefers-reduced-motion." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "container-max", "value": "1440px" }
+    ],
+    "grounds": [
+      { "name": "sheet", "value": "1px hairlines at 48px major pitch on paper", "purpose": "The primary drafting ground. Fixed pitch; never scales." },
+      { "name": "sheet-fine", "value": "48px major plus 8px minor hairlines", "purpose": "The hero sheet, ruled to the finer pitch." },
+      { "name": "cloth", "value": "48px major rule at rgba(255,255,255,0.06) on #0b0b0b", "purpose": "The cutting ground: Blocks band, cart rail, footer. Opted into per section, never a theme." },
+      { "name": "tooth", "value": "repeating-linear-gradient(0deg, rgba(11,11,11,0.028) 0 1px, transparent 1px 3px) at 50% opacity", "purpose": "Paper grain. Fixed 3px pitch — it is the stock, not a filter over the content." }
+    ],
+    "judgedExemptions": [
+      { "finding": "codex-grid-background", "file": "app/globals.css", "verdict": "kept", "reasoning": "The rule's own text exempts actual canvas, map, blueprint, and measurement surfaces. A pattern drafting sheet is exactly such a surface; the rule is the product's metaphor, not texture on an unrelated page." },
+      { "finding": "layout-transition", "file": "components/draft/SizeNest.jsx", "verdict": "kept", "reasoning": "False positive on the substring in SVG stroke-width. stroke-width is a paint property, not a CSS layout box property; nothing about the layout animates." }
+    ]
+  },
+  "components": [
+    {
+      "name": "Cut Button",
+      "kind": "button",
+      "refersTo": "button-cut",
+      "description": "The primary action, drawn as a piece cut off the sheet: solid ink fill with punched notch corners.",
+      "html": "<button class=\"ds-btn-cut\">Shop the sheet</button>",
+      "css": ".ds-btn-cut { display: inline-flex; align-items: center; justify-content: center; gap: 10px; height: 48px; padding: 0 28px; background: var(--ink, #0b0b0b); color: var(--paper, #ffffff); font-family: var(--font-mono, ui-monospace, monospace); font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em; border: none; border-radius: 0; cursor: pointer; clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px); transition: background-color 300ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-cut:hover { background: var(--graphite, #626262); } .ds-btn-cut:focus-visible { outline: 1.5px solid var(--ink, #0b0b0b); outline-offset: 3px; } .ds-btn-cut:disabled { opacity: 0.35; pointer-events: none; }"
+    },
+    {
+      "name": "Draft Button",
+      "kind": "button",
+      "refersTo": "button-draft",
+      "description": "The secondary action: drawn, not cut. A 1.5px rule on a transparent ground that inverts to solid ink on hover.",
+      "html": "<button class=\"ds-btn-draft\">Read the spec</button>",
+      "css": ".ds-btn-draft { display: inline-flex; align-items: center; justify-content: center; gap: 10px; height: 48px; padding: 0 28px; background: transparent; color: var(--ink, #0b0b0b); border: 1.5px solid var(--ink, #0b0b0b); border-radius: 0; font-family: var(--font-mono, ui-monospace, monospace); font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em; cursor: pointer; transition: background-color 300ms cubic-bezier(0.16, 1, 0.3, 1), color 300ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-draft:hover { background: var(--ink, #0b0b0b); color: var(--paper, #ffffff); } .ds-btn-draft:focus-visible { outline: 1.5px solid var(--ink, #0b0b0b); outline-offset: 3px; } .ds-btn-draft:disabled { opacity: 0.35; pointer-events: none; }"
+    },
+    {
+      "name": "Rule Input",
+      "kind": "input",
+      "refersTo": "input-rule",
+      "description": "A ruled line to write a measurement on. Focus thickens the existing rule from thin to cut rather than drawing a second frame.",
+      "html": "<input class=\"ds-input-rule\" type=\"text\" placeholder=\"PIN CODE\" />",
+      "css": ".ds-input-rule { height: 48px; width: 100%; padding: 0; background: transparent; color: var(--ink, #0b0b0b); border: none; border-bottom: 1.5px solid rgba(11,11,11,0.3); border-radius: 0; font-family: var(--font-mono, ui-monospace, monospace); font-size: 13px; letter-spacing: 0.06em; outline: none; transition: border-color 300ms cubic-bezier(0.16, 1, 0.3, 1), border-width 300ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-input-rule::placeholder { color: var(--graphite, #626262); } .ds-input-rule:focus, .ds-input-rule:focus-visible { border-bottom-width: 2.5px; border-bottom-color: var(--ink, #0b0b0b); outline: none; }"
+    },
+    {
+      "name": "Size Chip",
+      "kind": "chip",
+      "refersTo": "chip-size",
+      "description": "One size in the nest. Selected inverts to a solid ink fill; unavailable takes a dashed rule and a struck label — the same line-form vocabulary the grid uses.",
+      "html": "<div style=\"display:flex; gap:8px;\"><button class=\"ds-chip-size\">S</button><button class=\"ds-chip-size ds-chip-size--selected\">M</button><button class=\"ds-chip-size\" disabled>L</button></div>",
+      "css": ".ds-chip-size { height: 44px; min-width: 56px; padding: 0 12px; background: transparent; color: var(--ink, #0b0b0b); border: 1.5px solid rgba(11,11,11,0.3); border-radius: 0; font-family: var(--font-mono, ui-monospace, monospace); font-size: 12px; letter-spacing: 0.12em; cursor: pointer; transition: background-color 250ms cubic-bezier(0.16, 1, 0.3, 1), border-color 250ms cubic-bezier(0.16, 1, 0.3, 1), color 250ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-chip-size:hover { border-color: var(--ink, #0b0b0b); } .ds-chip-size--selected { background: var(--ink, #0b0b0b); color: var(--paper, #ffffff); border-color: var(--ink, #0b0b0b); } .ds-chip-size:disabled { border-style: dashed; opacity: 0.35; text-decoration: line-through; cursor: not-allowed; } .ds-chip-size:focus-visible { outline: 1.5px solid var(--ink, #0b0b0b); outline-offset: 3px; }"
+    },
+    {
+      "name": "Piece Cell",
+      "kind": "card",
+      "refersTo": "card-piece",
+      "description": "A product drawn as a pattern piece: punched window with register notches, frame style encoding stock state, spec row under a hairline. Rank is cell span, never type size.",
+      "html": "<article class=\"ds-piece\"><a class=\"ds-piece-link\" href=\"#\"><span class=\"ds-piece-window ds-state-stocked\"><svg class=\"ds-piece-block\" viewBox=\"0 0 100 120\" fill=\"none\" aria-hidden=\"true\"><path d=\"M30 18 L42 18 C45 24 55 24 58 18 L70 18 L92 34 L82 48 L74 42 L74 112 L26 112 L26 42 L18 48 L8 34 Z\" stroke=\"#0b0b0b\" stroke-width=\"1.25\" stroke-dasharray=\"4 5\" opacity=\"0.4\"/></svg><svg class=\"ds-notch ds-notch--top\" width=\"10\" height=\"10\" viewBox=\"0 0 10 10\" aria-hidden=\"true\"><path d=\"M0 0 L10 0 L5 9 Z\" fill=\"currentColor\"/></svg><svg class=\"ds-notch ds-notch--bottom\" width=\"10\" height=\"10\" viewBox=\"0 0 10 10\" aria-hidden=\"true\"><path d=\"M0 0 L10 0 L5 9 Z\" fill=\"currentColor\"/></svg></span><span class=\"ds-piece-head\"><span class=\"ds-piece-name\">Heavyweight Oversized Tee</span><span class=\"ds-piece-price\">₹1,299</span></span><span class=\"ds-piece-meta\">Oversized Tees · Boxy</span><span class=\"ds-piece-spec\"><span>240 GSM</span><span class=\"ds-piece-tick\"></span><span>In stock</span></span></a></article>",
+      "css": ".ds-piece { display: flex; flex-direction: column; width: 260px; font-family: var(--font-archivo, 'Helvetica Neue', Arial, sans-serif); color: var(--ink, #0b0b0b); } .ds-piece-link { display: flex; flex-direction: column; text-decoration: none; color: inherit; } .ds-piece-window { position: relative; display: block; aspect-ratio: 4 / 5; overflow: hidden; background: var(--paper-2, #f4f4f2); border: 1.5px solid var(--ink, #0b0b0b); border-radius: 0; color: rgba(11,11,11,0.7); } .ds-state-stocked { border-style: solid; border-color: var(--ink, #0b0b0b); } .ds-state-made { border-style: dashed; border-color: var(--ink, #0b0b0b); } .ds-state-low { border-style: solid; border-color: var(--graphite, #626262); } .ds-state-out { border-style: solid; border-color: var(--rule-thin, #cfcfcb); } .ds-state-out .ds-piece-name { text-decoration: line-through; text-decoration-thickness: 1px; } .ds-piece-block { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); height: 50%; width: auto; max-width: 58%; } .ds-notch { position: absolute; left: 50%; transform: translateX(-50%); } .ds-notch--top { top: 0; } .ds-notch--bottom { bottom: 0; transform: translateX(-50%) rotate(180deg); } .ds-piece-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding-top: 16px; } .ds-piece-name { font-size: 15px; font-weight: 600; line-height: 1.2; letter-spacing: -0.02em; } .ds-piece-price { flex-shrink: 0; font-family: var(--font-mono, ui-monospace, monospace); font-size: 13px; font-variant-numeric: tabular-nums; } .ds-piece-meta { padding-top: 8px; font-family: var(--font-mono, ui-monospace, monospace); font-size: 10px; line-height: 1; letter-spacing: 0.16em; text-transform: uppercase; color: var(--graphite, #626262); } .ds-piece-spec { display: flex; align-items: center; gap: 12px; margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(11,11,11,0.15); font-family: var(--font-mono, ui-monospace, monospace); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; font-variant-numeric: tabular-nums; color: var(--graphite, #626262); } .ds-piece-tick { width: 1px; height: 10px; background: rgba(11,11,11,0.2); } .ds-piece-link:hover .ds-piece-block { opacity: 0.55; } .ds-piece-link:focus-visible { outline: 1.5px solid var(--ink, #0b0b0b); outline-offset: 4px; }"
+    },
+    {
+      "name": "Title Block",
+      "kind": "custom",
+      "refersTo": "stamp",
+      "description": "The bottom-corner block of a technical drawing: a framed two-column grid of annotation rows, keys in graphite, values in tabular mono. The canonical way to present a specification set.",
+      "html": "<dl class=\"ds-titleblock\"><div class=\"ds-tb-row\"><dt>Piece</dt><dd>Oversized Tee</dd></div><div class=\"ds-tb-row\"><dt>Ref</dt><dd>FS·OS·M·1299</dd></div><div class=\"ds-tb-row\"><dt>Cloth</dt><dd>240 GSM Combed Cotton</dd></div><div class=\"ds-tb-row\"><dt>Graded</dt><dd>XS — XXL</dd></div></dl>",
+      "css": ".ds-titleblock { display: grid; grid-template-columns: auto 1fr; border: 1.5px solid var(--ink, #0b0b0b); border-radius: 0; width: max-content; } .ds-tb-row { display: contents; } .ds-titleblock dt, .ds-titleblock dd { font-family: var(--font-mono, ui-monospace, monospace); font-size: 10px; line-height: 1; letter-spacing: 0.16em; text-transform: uppercase; font-variant-numeric: tabular-nums; padding: 8px 12px; margin: 0; } .ds-titleblock dt { border-right: 1.5px solid rgba(11,11,11,0.25); color: var(--graphite, #626262); } .ds-titleblock dd { color: var(--ink, #0b0b0b); } .ds-tb-row:not(:first-child) dt, .ds-tb-row:not(:first-child) dd { border-top: 1px solid rgba(11,11,11,0.15); }"
+    },
+    {
+      "name": "Grain Arrow",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "The drawn mark that tells the cutter which way the cloth runs. Single-headed it aims at an action, so it can point at something and mean it.",
+      "html": "<span class=\"ds-grain\"><svg width=\"56\" height=\"10\" viewBox=\"0 0 56 10\" fill=\"none\" aria-hidden=\"true\"><path d=\"M2 5 L54 5\" stroke=\"currentColor\" stroke-width=\"1.5\"/><path d=\"M50 1.5 L55 5 L50 8.5\" stroke=\"currentColor\" stroke-width=\"1.5\" fill=\"none\"/></svg><span class=\"ds-grain-label\">Grain · shop the sheet</span></span>",
+      "css": ".ds-grain { display: inline-flex; align-items: center; gap: 8px; color: var(--ink, #0b0b0b); overflow: visible; } .ds-grain svg { overflow: visible; } .ds-grain-label { font-family: var(--font-mono, ui-monospace, monospace); font-size: 10px; line-height: 1; letter-spacing: 0.16em; text-transform: uppercase; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Section Rule",
+      "kind": "nav",
+      "refersTo": null,
+      "description": "How every section opens: a standing annotation label with the rule running out from it, like a fold line across the sheet.",
+      "html": "<div class=\"ds-sheetrule\"><span class=\"ds-sheetrule-label\">Sheet 02 · Pieces in stock</span><span class=\"ds-sheetrule-line\"></span><a class=\"ds-sheetrule-action\" href=\"#\">All pieces</a></div>",
+      "css": ".ds-sheetrule { display: flex; align-items: center; gap: 16px; width: 100%; } .ds-sheetrule-label { flex-shrink: 0; font-family: var(--font-mono, ui-monospace, monospace); font-size: 12px; font-weight: 500; line-height: 1; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink, #0b0b0b); } .ds-sheetrule-line { flex: 1; height: 1px; background: rgba(11,11,11,0.2); } .ds-sheetrule-action { font-family: var(--font-mono, ui-monospace, monospace); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--graphite, #626262); text-decoration: none; text-underline-offset: 0.28em; transition: color 200ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-sheetrule-action:hover { color: var(--ink, #0b0b0b); text-decoration: underline; } .ds-sheetrule-action:focus-visible { outline: 1.5px solid var(--ink, #0b0b0b); outline-offset: 3px; }"
+    },
+    {
+      "name": "Measuring Rule",
+      "kind": "nav",
+      "refersTo": null,
+      "description": "The ruled edge that closes the header — 41 tick marks, every fifth full height. The measuring rule the whole sheet registers against.",
+      "html": "<div class=\"ds-rule\" aria-hidden=\"true\"><span class=\"ds-rule-ticks\"><i class=\"ds-tick ds-tick--major\"></i><i class=\"ds-tick\"></i><i class=\"ds-tick\"></i><i class=\"ds-tick\"></i><i class=\"ds-tick\"></i><i class=\"ds-tick ds-tick--major\"></i><i class=\"ds-tick\"></i><i class=\"ds-tick\"></i><i class=\"ds-tick\"></i><i class=\"ds-tick\"></i><i class=\"ds-tick ds-tick--major\"></i><i class=\"ds-tick\"></i><i class=\"ds-tick\"></i><i class=\"ds-tick\"></i><i class=\"ds-tick\"></i><i class=\"ds-tick ds-tick--major\"></i></span></div>",
+      "css": ".ds-rule { position: relative; height: 8px; width: 100%; border-bottom: 1px solid rgba(11,11,11,0.2); } .ds-rule-ticks { position: absolute; inset: 0; display: flex; justify-content: space-between; } .ds-tick { width: 1px; height: 4px; align-self: flex-start; background: rgba(11,11,11,0.25); } .ds-tick--major { height: 8px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Drafting Table",
+    "overview": "The site is the pattern the garment is cut from. FITSTICH manufactures its own knitwear, so the blueprint is the proof of it — the interface is a ruled drafting sheet with pieces laid out on it, not a photo-led storefront with specs hidden in a caption. Every surface behaves like paper on a cutting table: a fixed rule underneath, hairlines drawn on top, marks that a cutter would recognise (grain lines, register notches, dimension lines, leaders, a title block), and every measurement set in mono where a draughtsman would letter it.\n\nThere are two grounds and both are earned. Ink on paper is the drafting ground and carries the great majority of the site. Chalk on cloth is the cutting ground — near-black bands used where the work moves from drawing to cutting: the Blocks section, the cart rail, the footer. This is a two-ground material system, not a light/dark theme; there is no dark mode and no toggle. A cloth band opts in explicitly and every component takes a tone of ink or chalk accordingly.\n\nThe palette is strictly monochrome, and that is a hard constraint rather than a stylistic lean: with no hue available, hierarchy and state have to be carried by line form and line weight. A stocked piece is framed by a solid rule, made-to-order by a dashed one, low stock by a graphite rule plus a 2.5px cut frame, and a sold-out piece by a hairline with its name struck through. The build refuses the D2C default it was drawn against: no full-bleed model hero, no rounded product cards, no colour-coded badges.",
+    "keyCharacteristics": [
+      "Fixed 48px major / 8px minor drafting rule under every ground; it never scales with content",
+      "Zero corner radius anywhere; the punched 12px notch is the only corner the system owns",
+      "Strictly monochrome — ink, graphite, chalk, and two rule greys",
+      "State and rank are line form and cell size, never hue and never bigger type",
+      "Engineering-gothic display (Archivo 800/900, tight negative tracking) against mono annotation (Spline Sans Mono, 10px, 0.16em, uppercase)",
+      "Flat by default: one sanctioned shadow in the whole system",
+      "Photography is a slot in a punched window, monochrome and top-cropped, never the foundation"
+    ],
+    "rules": [
+      { "name": "The Two Grounds Rule", "body": "Ink-on-paper and chalk-on-cloth are two materials, not two themes. A cloth ground is opted into per section and everything inside it — buttons, inputs, rules, marks — switches to its chalk tone. Never invert the page, never ship a theme toggle, and never place a paper-toned control on cloth.", "section": "colors" },
+      { "name": "The No Hue Rule", "body": "No colour enters this system. Not for a sale badge, not for an error, not for a stock warning, not for a brand accent. If something must escalate, it escalates by line weight, fill, or frame.", "section": "colors" },
+      { "name": "The Everything-Is-A-Measurement Rule", "body": "Every number rendered on this site — price, GSM, chest, length, quantity, order count — is set in Spline Sans Mono with tabular numerals. Numbers line up in columns even when they aren't in a table. Counts pad to two digits (04, not 4).", "section": "typography" },
+      { "name": "The Annotation-Points Rule", "body": "Labels annotate; they do not caption. A spec reference belongs in the margin, on a leader line, or inside a title block — the way a real sheet carries it. Never stack a small uppercase label directly above a heading as an eyebrow.", "section": "typography" },
+      { "name": "The Rank-Is-Not-Size Rule", "body": "A promoted product does not get bigger type. Product names are one size everywhere on the site; promotion is expressed in the layout.", "section": "typography" },
+      { "name": "The Fixed Pitch Rule", "body": "The drafting rule is 48px major / 8px minor and never changes. It does not scale with the container, the viewport, the font size, or the section. It is the paper, not a decoration on the paper.", "section": "layout" },
+      { "name": "The Cell-Size Rank Rule", "body": "A promoted piece takes 2 columns by 2 rows of the grid and nothing else changes — same type sizes, same weights, same frame. Rank is how much of the sheet a piece is given, never a larger heading or a louder colour.", "section": "layout" },
+      { "name": "The Flat Sheet Rule", "body": "Nothing on this site is lifted off the sheet by shadow. No card shadows, no hover elevation, no drop shadows on type, no hard offset shadows. If an element needs to separate, it gets a rule, a heavier border, or a different ground.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do rule every new ground with the sheet at fixed 48px major / 8px minor pitch, and paint paper with .tooth so it reads as stock.",
+      "Do carry state in line form — solid stocked, dashed made-to-order, graphite low, hairline plus strike-through cut out — and escalate by changing the frame (a 2.5px cut border), never by changing colour.",
+      "Do set every number in Spline Sans Mono with tabular numerals, and pad counts to two digits.",
+      "Do give each surface exactly one ground and switch every component on it to the matching ink or chalk tone.",
+      "Do express rank in the grid as cell span (2x2), keeping type sizes identical across all cells.",
+      "Do annotate with the drawn marks the system already owns — grain arrow, notch, dimension line, leader, section rule, title block, margin stamp.",
+      "Do paint a drawn fallback block behind every image window and cross-fade the photograph in only after it decodes.",
+      "Do treat photography as monochrome, top-cropped (50% 22%), width-limited, and framed by a punched window.",
+      "Do keep body copy at or under 68ch."
+    ],
+    "donts": [
+      "Don't introduce a hue. Not for sale badges, errors, stock states, or brand accent.",
+      "Don't round a corner. The only corner in this system is the 12px punched notch on the primary action.",
+      "Don't add a shadow. One exists (the scrolled header) and it is the whole vocabulary; separate with a rule instead.",
+      "Don't build a dark mode or a theme toggle. Cloth is a material used in specific bands, not an inverted copy of the site.",
+      "Don't scale the sheet's grid with content, container, or breakpoint.",
+      "Don't stack a small uppercase label above a heading as an eyebrow; annotation points at things from the margin or a leader line.",
+      "Don't make a promoted product's heading bigger — promote it with grid span.",
+      "Don't draw a second frame on focus. A focused input thickens its existing rule; one control, one edge, at every state.",
+      "Don't animate a layout box. Motion here is paint — opacity, colour, stroke weight, transform — never width, height, or position in flow.",
+      "Don't put a glyph icon where a drawn mark belongs; the drafting vocabulary is the icon set."
+    ]
+  }
+}

@@ -1,55 +1,101 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
-import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { signIn } from 'next-auth/react';
 import { toast } from 'sonner';
+import { CutButton, DraftButton, RuleInput } from '@/components/draft/controls';
+import { GrainArrow, Notch } from '@/components/draft/marks';
 
 export default function SignInPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = async (e) => {
+  async function submit(e) {
     e.preventDefault();
+    setError('');
     setLoading(true);
     const r = await signIn('credentials', { email, password, redirect: false });
     setLoading(false);
-    if (r?.ok) { toast.success('Signed in'); router.push('/account'); }
-    else toast.error('Invalid email or password');
-  };
+    if (r?.ok) {
+      toast.success('Signed in');
+      router.push('/account');
+    } else {
+      setError('That email and password do not match an account.');
+    }
+  }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-neutral-50 p-4">
-      <div className="w-full max-w-md bg-white p-8">
-        <div className="text-center mb-8">
-          <h1 className="font-display font-black text-3xl tracking-tight">FITSTICH.</h1>
-          <p className="text-neutral-500 text-sm mt-2">Sign in to your account</p>
-        </div>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required className="h-12 rounded-none" />
-          <Input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required className="h-12 rounded-none" />
-          <Button type="submit" disabled={loading} className="w-full h-12 rounded-none bg-black hover:bg-neutral-800 text-xs uppercase tracking-[0.2em]">
-            {loading ? 'Signing in...' : 'Sign in'}
-          </Button>
+    <main className="sheet-fine tooth flex min-h-screen items-center justify-center px-5 py-16">
+      <div className="w-full max-w-[420px]">
+        <Link href="/" className="font-display text-2xl tracking-[-0.05em]" style={{ fontWeight: 900 }}>
+          FITSTICH
+        </Link>
+
+        <h1 className="display mt-12 text-[clamp(2rem,7vw,2.9rem)]">Open your file.</h1>
+
+        <form onSubmit={submit} className="mt-10 flex flex-col gap-7">
+          <div>
+            <label htmlFor="email" className="annot mb-2 block text-graphite">
+              Email
+            </label>
+            <RuleInput
+              id="email"
+              type="email"
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="password" className="annot mb-2 block text-graphite">
+              Password
+            </label>
+            <RuleInput
+              id="password"
+              type="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          {error && (
+            <p className="annot flex items-center gap-2">
+              <Notch size={8} dir="right" />
+              {error}
+            </p>
+          )}
+
+          <CutButton type="submit" size="lg" disabled={loading} className="w-full">
+            {loading ? 'Checking…' : 'Sign in'}
+          </CutButton>
         </form>
-        <div className="relative my-6">
-          <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-neutral-200" /></div>
-          <div className="relative flex justify-center"><span className="bg-white px-3 text-xs text-neutral-400">or</span></div>
+
+        <div className="my-8 flex items-center gap-4">
+          <span className="h-px flex-1 bg-ink/20" />
+          <span className="annot text-graphite">or</span>
+          <span className="h-px flex-1 bg-ink/20" />
         </div>
-        <Button onClick={() => signIn('google', { callbackUrl: '/account' })} variant="outline" className="w-full h-12 rounded-none border-black text-xs uppercase tracking-[0.2em]">
+
+        <DraftButton onClick={() => signIn('google', { callbackUrl: '/account' })} size="lg" className="w-full">
           Continue with Google
-        </Button>
-        <p className="text-center text-sm text-neutral-500 mt-6">
-          No account? <a href="/auth/signup" className="underline underline-offset-4 hover:text-black">Sign up</a>
-        </p>
-        <p className="text-center text-xs text-neutral-400 mt-2">
-          <a href="/" className="hover:text-black">← Back to store</a>
+        </DraftButton>
+
+        <p className="annot mt-10 flex items-center gap-3 text-graphite">
+          <GrainArrow />
+          New here?{' '}
+          <Link href="/auth/signup" className="text-ink underline underline-offset-4">
+            Create an account
+          </Link>
         </p>
       </div>
-    </div>
+    </main>
   );
 }

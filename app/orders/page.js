@@ -1,170 +1,247 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { toast } from 'sonner';
-import { Package, Search, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
+import { Suspense, useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { cx, inr } from '@/lib/draft';
+import Header from '@/components/site/Header';
+import Footer from '@/components/site/Footer';
+import CartRail from '@/components/site/CartRail';
+import { CutButton, RuleInput } from '@/components/draft/controls';
+import { TitleBlock, SheetStamp, Notch } from '@/components/draft/marks';
 
-const inr = (n) => `₹${Number(n || 0).toLocaleString('en-IN')}`;
-const STATUS_BADGE = {
-  pending: 'bg-amber-100 text-amber-800',
-  processing: 'bg-blue-100 text-blue-800',
-  shipped: 'bg-indigo-100 text-indigo-800',
-  delivered: 'bg-emerald-100 text-emerald-800',
-  cancelled: 'bg-red-100 text-red-800',
-};
+/** Fulfilment as a cutting-room travelling ticket: each stage stamped or not. */
+const STAGES = [
+  { key: 'pending', label: 'Received' },
+  { key: 'confirmed', label: 'Cut' },
+  { key: 'shipped', label: 'Shipped' },
+  { key: 'delivered', label: 'Delivered' },
+];
 
-export default function OrdersPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [order, setOrder] = useState(null);
-  const [orders, setOrders] = useState([]);
-  const [email, setEmail] = useState('');
-  const [orderId, setOrderId] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useState('lookup'); // lookup or list
+function Progress({ status }) {
+  const idx = Math.max(0, STAGES.findIndex((s) => s.key === status));
+  const cancelled = status === 'cancelled';
 
-  useEffect(() => {
-    const id = searchParams.get('id');
-    const em = searchParams.get('email');
-    if (id && em) { setOrderId(id); setEmail(em); lookupOrder(id, em); }
-  }, []);
-
-  const lookupOrder = async (oid, em) => {
-    setLoading(true);
-    try {
-      const r = await fetch(`/api/orders/lookup?orderId=${encodeURIComponent(oid)}&email=${encodeURIComponent(em)}`);
-      const data = await r.json();
-      if (r.ok && data.order) setOrder(data.order);
-      else toast.error('Order not found');
-    } catch { toast.error('Lookup failed'); }
-    setLoading(false);
-  };
-
-  const handleLookup = (e) => {
-    e.preventDefault();
-    if (!email || !orderId) { toast.error('Enter both email and order ID'); return; }
-    lookupOrder(orderId, email);
-  };
-
-  const handleEmailSearch = async () => {
-    if (!email) { toast.error('Enter your email'); return; }
-    setLoading(true);
-    try {
-      const r = await fetch('/api/orders/lookup', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }),
-      });
-      const data = await r.json();
-      if (r.ok) { setOrders(data.orders || []); setMode('list'); }
-      else toast.error(data.error);
-    } catch { toast.error('Search failed'); }
-    setLoading(false);
-  };
-
-  if (order) {
+  if (cancelled) {
     return (
-      <div className="min-h-screen bg-neutral-50">
-        <div className="max-w-[800px] mx-auto px-4 py-8">
-          <button onClick={() => { setOrder(null); setMode('lookup'); router.push('/orders'); }} className="flex items-center gap-2 text-sm text-neutral-500 hover:text-black mb-6">
-            <ArrowLeft className="w-4 h-4" /> Back
-          </button>
-          <h1 className="font-display font-black text-2xl tracking-tight mb-6">Order #{order.id}</h1>
-          <div className="bg-white p-6 mb-4">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <p className="text-sm text-neutral-500">Placed on {new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
-                <p className="text-sm text-neutral-500">{order.customer?.name} · {order.customer?.email}</p>
-              </div>
-              <span className={`text-xs uppercase tracking-widest px-3 py-1 ${STATUS_BADGE[order.status] || 'bg-neutral-100 text-neutral-800'}`}>{order.status}</span>
-            </div>
-            <div className="space-y-3 mb-6">
-              {order.items?.map((i, idx) => (
-                <div key={idx} className="flex gap-3">
-                  <div className="w-16 h-20 bg-neutral-50 flex-shrink-0"><img src={i.image} alt="" className="w-full h-full object-cover" /></div>
-                  <div className="flex-1">
-                    <div className="text-sm font-medium">{i.name}</div>
-                    <div className="text-xs text-neutral-500">{i.size} · {i.color?.name} · x{i.quantity}</div>
-                    <div className="text-sm">{inr(i.price * i.quantity)}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="border-t border-neutral-100 pt-3 space-y-1 text-sm">
-              <div className="flex justify-between"><span className="text-neutral-500">Subtotal</span><span>{inr(order.subtotal)}</span></div>
-              {order.discount > 0 && <div className="flex justify-between text-green-700"><span>Discount</span><span>-{inr(order.discount)}</span></div>}
-              <div className="flex justify-between"><span className="text-neutral-500">Shipping</span><span>{order.shipping ? inr(order.shipping) : 'FREE'}</span></div>
-              <div className="flex justify-between font-bold text-lg border-t pt-2 mt-2"><span>Total</span><span>{inr(order.total)}</span></div>
-            </div>
-            <div className="mt-4 text-xs text-neutral-400">
-              Payment: {order.paymentMethod?.toUpperCase()} · {order.paymentStatus}
-              {order.trackingNumber && <p className="mt-1">📦 Tracking: {order.trackingNumber}</p>}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (mode === 'list') {
-    return (
-      <div className="min-h-screen bg-neutral-50">
-        <div className="max-w-[800px] mx-auto px-4 py-8">
-          <button onClick={() => setMode('lookup')} className="flex items-center gap-2 text-sm text-neutral-500 hover:text-black mb-6">
-            <ArrowLeft className="w-4 h-4" /> Back
-          </button>
-          <h1 className="font-display font-black text-2xl tracking-tight mb-2">My Orders</h1>
-          <p className="text-neutral-500 text-sm mb-6">{email}</p>
-          {orders.length === 0 ? (
-            <div className="text-center py-20 text-neutral-400"><Package className="w-10 h-10 mx-auto mb-4 stroke-1" /><p>No orders found</p></div>
-          ) : (
-            <div className="space-y-3">
-              {orders.map(o => (
-                <button key={o.id} onClick={() => setOrder(o)} className="w-full bg-white p-4 text-left hover:shadow-md transition">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <div className="font-medium">#{o.id}</div>
-                      <div className="text-xs text-neutral-500">{new Date(o.createdAt).toLocaleDateString('en-IN')}</div>
-                      <div className="text-xs text-neutral-500">{o.items?.length} item(s) · {inr(o.total)}</div>
-                    </div>
-                    <span className={`text-xs uppercase tracking-widest px-2 py-0.5 ${STATUS_BADGE[o.status] || ''}`}>{o.status}</span>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+      <div className="border-thin border-dashed border-ink px-4 py-3">
+        <span className="annot">Cancelled — nothing was cut</span>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white p-8">
-        <div className="text-center mb-8">
-          <Package className="w-10 h-10 mx-auto mb-4 stroke-1" />
-          <h1 className="font-display font-black text-2xl tracking-tight mb-2">Track your order</h1>
-          <p className="text-sm text-neutral-500">Enter your email and order ID to view details</p>
+    <ol className="flex items-stretch">
+      {STAGES.map((s, i) => {
+        const done = i <= idx;
+        return (
+          <li key={s.key} className="flex flex-1 flex-col gap-2.5">
+            <span
+              className={cx(
+                'h-[3px] w-full',
+                done ? 'bg-ink' : 'bg-ink/15',
+                i === idx && 'relative'
+              )}
+            />
+            <span className={cx('annot flex items-center gap-1.5', done ? 'text-ink' : 'text-graphite')}>
+              {i === idx && <Notch size={7} dir="right" />}
+              {s.label}
+            </span>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+function OrdersInner() {
+  const params = useSearchParams();
+  const [orderId, setOrderId] = useState('');
+  const [email, setEmail] = useState('');
+  const [order, setOrder] = useState(null);
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    const id = params.get('id');
+    const em = params.get('email');
+    if (id) setOrderId(id);
+    if (em) setEmail(em);
+    if (id && em) lookup(id, em);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params]);
+
+  async function lookup(id = orderId, em = email) {
+    if (!id.trim() || !em.trim()) {
+      setError('Both the order number and the email it was placed with.');
+      return;
+    }
+    setBusy(true);
+    setError('');
+    try {
+      const r = await fetch(`/api/orders/lookup?orderId=${encodeURIComponent(id)}&email=${encodeURIComponent(em)}`);
+      const data = await r.json();
+      if (!r.ok) {
+        setOrder(null);
+        setError(
+          r.status === 404
+            ? 'No order under that number and email. Check the confirmation mail.'
+            : data.error || 'Lookup failed.'
+        );
+        return;
+      }
+      setOrder(data.order);
+    } catch {
+      setError('Could not reach the order desk. Try again.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="relative mx-auto max-w-[900px] px-5 py-12 lg:px-10 lg:py-16">
+      <SheetStamp className="absolute right-5 top-6 hidden lg:inline-flex">Order desk</SheetStamp>
+      <h1 className="display text-[clamp(2.2rem,6vw,3.4rem)]">Track an order</h1>
+      <p className="measure mt-6 text-[16px] leading-relaxed text-graphite">
+        The number is on your confirmation mail, with the address you placed it from.
+      </p>
+
+      <form
+        className="mt-10 grid gap-7 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
+        onSubmit={(e) => {
+          e.preventDefault();
+          lookup();
+        }}
+      >
+        <div>
+          <label htmlFor="oid" className="annot mb-2 block text-graphite">
+            Order number
+          </label>
+          <RuleInput id="oid" value={orderId} onChange={(e) => setOrderId(e.target.value)} placeholder="FS-…" />
         </div>
-        <form onSubmit={handleLookup} className="space-y-3">
-          <Input type="email" placeholder="Your email" value={email} onChange={e => setEmail(e.target.value)} required className="h-11 rounded-none" />
-          <Input placeholder="Order ID (e.g. FS-...)" value={orderId} onChange={e => setOrderId(e.target.value)} className="h-11 rounded-none" />
-          <Button type="submit" disabled={loading} className="w-full h-11 rounded-none bg-black hover:bg-neutral-800 text-xs uppercase tracking-[0.2em]">
-            <Search className="w-4 h-4 mr-2" /> {loading ? 'Searching...' : 'Look up order'}
-          </Button>
-        </form>
-        <div className="relative my-6">
-          <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-neutral-200" /></div>
-          <div className="relative flex justify-center"><span className="bg-white px-3 text-xs text-neutral-400">or</span></div>
+        <div>
+          <label htmlFor="oem" className="annot mb-2 block text-graphite">
+            Email
+          </label>
+          <RuleInput id="oem" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
         </div>
-        <Button onClick={handleEmailSearch} disabled={loading} variant="outline" className="w-full h-11 rounded-none border-black text-xs uppercase tracking-[0.2em]">
-          See all orders for this email
-        </Button>
-        <p className="text-center text-xs text-neutral-400 mt-6">
-          <a href="/" className="hover:text-black">← Back to store</a>
+        <CutButton type="submit" disabled={busy}>
+          {busy ? 'Looking…' : 'Find it'}
+        </CutButton>
+      </form>
+
+      {error && (
+        <p className="annot mt-6 flex items-center gap-2">
+          <Notch size={8} dir="right" />
+          {error}
         </p>
-      </div>
+      )}
+
+      {/* Without an order on screen this page would be a form over dead sheet;
+          fill it with the answer to the question people actually arrive with. */}
+      {!order && (
+        <div className="mt-14 grid gap-x-10 gap-y-8 border-t-hair border-ink/20 pt-10 sm:grid-cols-2">
+          {[
+            {
+              q: 'Cannot find the number?',
+              a: 'It is in the subject line of your confirmation mail, in the form FS-XXXXXX. Search your inbox for FITSTICH.',
+            },
+            {
+              q: 'Ordered while signed in?',
+              a: 'Your orders are listed in your account with their stage on the cutting floor — no number needed.',
+            },
+            {
+              q: 'What the stages mean',
+              a: 'Received, then Cut once the pattern is on cloth, then Shipped when it leaves us, then Delivered.',
+            },
+            {
+              q: 'Something wrong with it?',
+              a: 'Returns are open for 7 days from delivery on unworn pieces with tags attached. See the returns sheet.',
+            },
+          ].map((f) => (
+            <div key={f.q} className="relative pl-6">
+              <Notch className="absolute left-0 top-1" dir="right" size={8} />
+              <h2 className="font-display text-[15px] font-bold tracking-[-0.02em]">{f.q}</h2>
+              <p className="measure mt-2 text-[14px] leading-relaxed text-graphite">{f.a}</p>
+            </div>
+          ))}
+
+          <TitleBlock
+            className="mt-4 w-full max-w-[430px] sm:col-span-2"
+            rows={[
+              ['Sheet', 'FS-ORD'],
+              ['Desk', 'Order tracking'],
+              ['Returns', '7 days from delivery'],
+            ]}
+          />
+        </div>
+      )}
+
+      {order && (
+        <div className="mt-14 border-thin border-ink p-6 lg:p-8">
+          <div className="mb-8 flex flex-wrap items-baseline justify-between gap-4">
+            <span className="font-display text-xl font-bold tracking-[-0.03em]">{order.id}</span>
+            <span className="annot text-graphite">
+              {order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : ''}
+            </span>
+          </div>
+
+          <Progress status={order.status} />
+
+          <div className="mt-10 flex flex-col">
+            {(order.items || []).map((i, n) => (
+              <div key={n} className="flex gap-4 border-b-hair border-ink/15 py-4">
+                <span className="h-20 w-16 shrink-0 overflow-hidden border-hair border-ink/25 bg-paper-2">
+                  {i.image && <img src={i.image} alt="" className="h-full w-full object-cover grayscale" />}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block font-display text-[15px] font-semibold tracking-[-0.02em]">{i.name}</span>
+                  <span className="annot mt-1.5 block text-graphite">
+                    {i.size} · {i.color?.name} · ×{i.quantity}
+                  </span>
+                </span>
+                <span className="font-mono text-[13px] tnum">{inr(i.price * i.quantity)}</span>
+              </div>
+            ))}
+          </div>
+
+          <TitleBlock
+            className="mt-8 w-full max-w-md"
+            rows={[
+              ['Total', inr(order.total)],
+              ['Payment', `${order.paymentMethod || '—'} · ${order.paymentStatus || '—'}`],
+              ['Ship to', `${order.customer?.city || ''} ${order.customer?.pincode || ''}`.trim() || '—'],
+              ...(order.trackingId ? [['Tracking', order.trackingId]] : []),
+            ]}
+          />
+        </div>
+      )}
     </div>
+  );
+}
+
+export default function OrdersPage() {
+  return (
+    <>
+      <Header />
+      <main className="sheet-fine tooth relative min-h-[70vh]">
+        {/* the drawing's ruled margin */}
+        <span
+          className="pointer-events-none absolute inset-4 hidden border-hair border-ink/20 lg:block lg:inset-6"
+          aria-hidden="true"
+        />
+        <Suspense
+          fallback={
+            <div className="mx-auto max-w-[900px] px-5 py-16">
+              <span className="annot text-graphite">Opening the order desk…</span>
+            </div>
+          }
+        >
+          <OrdersInner />
+        </Suspense>
+      </main>
+      <Footer />
+      <CartRail />
+    </>
   );
 }

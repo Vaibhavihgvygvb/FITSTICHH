@@ -1,20 +1,24 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
-import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
-import { Package, User, Mail, MapPin, ArrowLeft, LogOut } from 'lucide-react';
-import { signOut } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
+import { cx, inr } from '@/lib/draft';
+import Header from '@/components/site/Header';
+import Footer from '@/components/site/Footer';
+import CartRail from '@/components/site/CartRail';
+import { CutButton, DraftButton } from '@/components/draft/controls';
+import { Notch } from '@/components/draft/marks';
 
-const inr = (n) => `₹${Number(n || 0).toLocaleString('en-IN')}`;
-const STATUS_BADGE = {
-  pending: 'bg-amber-100 text-amber-800',
-  processing: 'bg-blue-100 text-blue-800',
-  shipped: 'bg-indigo-100 text-indigo-800',
-  delivered: 'bg-emerald-100 text-emerald-800',
-  cancelled: 'bg-red-100 text-red-800',
+/** Status reads as line form — solid for done, dashed for in flight, hairline for cancelled. */
+const STATUS_LINE = {
+  pending: 'border-dashed border-ink',
+  processing: 'border-dashed border-ink',
+  confirmed: 'border-solid border-ink',
+  shipped: 'border-solid border-ink',
+  delivered: 'border-solid border-ink bg-ink text-paper',
+  cancelled: 'border-solid border-ink/30 text-graphite line-through',
 };
 
 export default function AccountPage() {
@@ -25,71 +29,105 @@ export default function AccountPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/auth/signin');
-  }, [status]);
+  }, [status, router]);
 
   useEffect(() => {
-    if (session?.user?.id) {
-      fetch('/api/orders/user')
-        .then(r => r.json())
-        .then(d => setOrders(d.orders || []))
-        .catch(() => {})
-        .finally(() => setLoading(false));
-    }
+    if (!session?.user?.id) return;
+    fetch('/api/orders/user')
+      .then((r) => r.json())
+      .then((d) => setOrders(d.orders || []))
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, [session]);
 
-  if (status === 'loading' || loading) return <div className="min-h-screen flex items-center justify-center"><p className="text-neutral-400">Loading...</p></div>;
+  const initial = session?.user?.name?.[0] || session?.user?.email?.[0] || '?';
 
   return (
-    <div className="min-h-screen bg-neutral-50">
-      <div className="max-w-[1000px] mx-auto px-4 py-8">
-        <button onClick={() => router.push('/')} className="flex items-center gap-2 text-sm text-neutral-500 hover:text-black mb-6">
-          <ArrowLeft className="w-4 h-4" /> Back to store
-        </button>
-        {/* Profile */}
-        <div className="bg-white p-6 mb-6">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-full bg-black text-white flex items-center justify-center text-xl font-bold">
-                {session?.user?.name?.[0] || session?.user?.email?.[0] || '?'}
-              </div>
-              <div>
-                <h1 className="font-display font-black text-2xl tracking-tight">{session?.user?.name || 'Account'}</h1>
-                <p className="text-sm text-neutral-500 flex items-center gap-1"><Mail className="w-3 h-3" /> {session?.user?.email}</p>
-              </div>
-            </div>
-            <button onClick={() => signOut({ callbackUrl: '/' })} className="flex items-center gap-1 text-xs text-neutral-400 hover:text-black">
-              <LogOut className="w-3 h-3" /> Sign out
-            </button>
-          </div>
-        </div>
-        {/* Orders */}
-        <h2 className="font-display font-black text-xl tracking-tight mb-4 flex items-center gap-2">
-          <Package className="w-5 h-5" /> My Orders
-        </h2>
-        {orders.length === 0 ? (
-          <div className="bg-white p-12 text-center text-neutral-400">
-            <Package className="w-10 h-10 mx-auto mb-4 stroke-1" />
-            <p className="mb-4">No orders yet</p>
-            <Button onClick={() => router.push('/')} className="rounded-none bg-black text-xs uppercase tracking-[0.2em]">Start shopping</Button>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {orders.map(o => (
-              <button key={o.id} onClick={() => router.push(`/orders?id=${o.id}&email=${encodeURIComponent(o.customer?.email || '')}`)} className="w-full bg-white p-4 text-left hover:shadow-md transition">
-                <div className="flex justify-between items-start">
+    <>
+      <Header />
+      <main className="sheet-fine tooth min-h-[70vh]">
+        <div className="mx-auto max-w-[1000px] px-5 py-12 lg:px-10 lg:py-16">
+          {status === 'loading' || loading ? (
+            <span className="annot text-graphite">Opening the file…</span>
+          ) : (
+            <>
+              <div className="flex flex-wrap items-end justify-between gap-6 border-b-cut border-ink pb-8">
+                <div className="flex items-center gap-5">
+                  <span className="flex h-16 w-16 items-center justify-center border-thin border-ink font-display text-2xl" style={{ fontWeight: 800 }}>
+                    {String(initial).toUpperCase()}
+                  </span>
                   <div>
-                    <div className="font-medium">#{o.id}</div>
-                    <div className="text-xs text-neutral-500">{new Date(o.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
-                    <div className="text-xs text-neutral-500">{o.items?.length} item(s) · {inr(o.total)} · {o.paymentMethod?.toUpperCase()}</div>
-                    {o.trackingNumber && <div className="text-xs text-indigo-600 mt-1">📦 {o.trackingNumber}</div>}
+                    <h1 className="display text-[clamp(1.9rem,5vw,2.7rem)]">
+                      {session?.user?.name || 'Account'}
+                    </h1>
+                    <p className="annot mt-2 text-graphite">{session?.user?.email}</p>
                   </div>
-                  <span className={`text-xs uppercase tracking-widest px-2 py-0.5 ${STATUS_BADGE[o.status] || ''}`}>{o.status}</span>
                 </div>
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
+                <DraftButton size="sm" onClick={() => signOut({ callbackUrl: '/' })}>
+                  Sign out
+                </DraftButton>
+              </div>
+
+              <div className="mt-12">
+                <span className="annot mb-6 block text-graphite">
+                  Orders · {String(orders.length).padStart(2, '0')}
+                </span>
+
+                {orders.length === 0 ? (
+                  <div className="flex flex-col items-start gap-5 border-thin border-dashed border-ink/40 p-10">
+                    <p className="font-display text-2xl tracking-[-0.03em]">Nothing cut yet</p>
+                    <p className="measure text-[15px] text-graphite">
+                      When you order, it shows up here with its stage on the cutting floor.
+                    </p>
+                    <CutButton as={Link} href="/shop/men">
+                      Open the sheet
+                    </CutButton>
+                  </div>
+                ) : (
+                  <div className="flex flex-col">
+                    {orders.map((o) => (
+                      <Link
+                        key={o.id}
+                        href={`/orders?id=${o.id}&email=${encodeURIComponent(o.customer?.email || '')}`}
+                        className="group flex flex-wrap items-center justify-between gap-4 border-b-hair border-ink/15 py-5 transition-colors hover:bg-paper-2"
+                      >
+                        <div className="flex items-center gap-4">
+                          <Notch size={8} dir="right" className="text-ink opacity-0 transition-opacity group-hover:opacity-100" />
+                          <div>
+                            <span className="block font-mono text-[13px]">{o.id}</span>
+                            <span className="annot mt-1.5 block text-graphite">
+                              {new Date(o.createdAt).toLocaleDateString('en-IN', {
+                                day: '2-digit',
+                                month: 'short',
+                                year: 'numeric',
+                              })}{' '}
+                              · {o.items?.length} {o.items?.length === 1 ? 'piece' : 'pieces'}
+                              {o.trackingNumber ? ` · ${o.trackingNumber}` : ''}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-5">
+                          <span className="font-mono text-[13px] tnum">{inr(o.total)}</span>
+                          <span
+                            className={cx(
+                              'annot border-thin px-2.5 py-1.5',
+                              STATUS_LINE[o.status] || 'border-ink'
+                            )}
+                          >
+                            {o.status}
+                          </span>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      </main>
+      <Footer />
+      <CartRail />
+    </>
   );
 }

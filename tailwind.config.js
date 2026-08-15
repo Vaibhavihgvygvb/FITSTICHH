@@ -18,6 +18,16 @@ module.exports = {
       },
       extend: {
         colors: {
+          paper: 'var(--paper)',
+          'paper-2': 'var(--paper-2)',
+          cloth: 'var(--cloth)',
+          'cloth-2': 'var(--cloth-2)',
+          ink: 'var(--ink)',
+          graphite: 'var(--graphite)',
+          chalk: 'var(--chalk)',
+          'chalk-dim': 'var(--chalk-dim)',
+          'rule-hair': 'var(--rule-hair)',
+          'rule-thin': 'var(--rule-thin)',
           border: 'hsl(var(--border))',
           input: 'hsl(var(--input))',
           ring: 'hsl(var(--ring))',
@@ -73,6 +83,19 @@ module.exports = {
           lg: 'var(--radius)',
           md: 'calc(var(--radius) - 2px)',
           sm: 'calc(var(--radius) - 4px)'
+        },
+        borderWidth: {
+          hair: 'var(--w-hair)',
+          thin: 'var(--w-thin)',
+          cut: 'var(--w-cut)'
+        },
+        fontFamily: {
+          display: ['var(--font-archivo)', 'Helvetica Neue', 'Arial', 'sans-serif'],
+          mono: ['var(--font-mono)', 'ui-monospace', 'monospace']
+        },
+        transitionTimingFunction: {
+          draft: 'cubic-bezier(0.16, 1, 0.3, 1)',
+          snap: 'cubic-bezier(0.32, 0.72, 0, 1)'
         },
         keyframes: {
           'accordion-down': {
